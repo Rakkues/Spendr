@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9492D1342F8F593A00DF3CB0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9492D1332F8F593A00DF3CB0 /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		9492D0A92F868E4F00DF3CB0 /* Spendr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spendr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9492D1332F8F593A00DF3CB0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +37,7 @@
 		9492D0A02F868E4F00DF3CB0 = {
 			isa = PBXGroup;
 			children = (
+				9492D1332F8F593A00DF3CB0 /* README.md */,
 				9492D0AB2F868E4F00DF3CB0 /* Spendr */,
 				9492D0AA2F868E4F00DF3CB0 /* Products */,
 			);
@@ -109,6 +115,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9492D1342F8F593A00DF3CB0 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
