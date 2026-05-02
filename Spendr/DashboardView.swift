@@ -8,15 +8,28 @@
 import SwiftUI
 
 struct DashboardView: View {
-    var body: some View {
-        GeometryReader {
-            geometry in VStack(spacing: 0) {
-                VStack {
-                    Text("Total spendings:")
-                        .font(.headline)
-                }
-                .frame(height: geometry.size.height * 0.4)
+    @State private var isExpanded = false
 
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                Text("Total spendings:")
+                    .font(.headline)
+                    .frame(height: geometry.size.height * (isExpanded ? 0.0 : 0.4))
+
+                Button(action: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
+                        .font(.headline)
+                        .padding(8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.gray.opacity(0.2))
+                        .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
+                }
+                
                 ScrollView {
                     VStack(spacing: 15) {
                         VStack {
@@ -39,9 +52,12 @@ struct DashboardView: View {
                         }
                     }
                 }
+                .frame(height: isExpanded ? geometry.size.height : geometry.size.height * 0.6)
+                .contentShape(Rectangle())
                 .frame(maxWidth: .infinity)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
