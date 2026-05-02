@@ -12,10 +12,27 @@ struct DashboardView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let topInset = geometry.safeAreaInsets.top
+            
             VStack(spacing: 0) {
-                Text("Total spendings:")
-                    .font(.headline)
-                    .frame(height: geometry.size.height * (isExpanded ? 0.0 : 0.4))
+                if !isExpanded {
+                    ZStack {
+                        // Placeholder for Pie Chart view
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.gray.opacity(0.12))
+                            .overlay(
+                                VStack(spacing: 8) {
+                                    Text("Spending Distribution")
+                                        .font(.headline)
+                                    Text("Pie chart goes here")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding()
+                            )
+                    }
+                    .frame(height: geometry.size.height * 0.3)
+                }
 
                 Button(action: {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
@@ -52,14 +69,14 @@ struct DashboardView: View {
                         }
                     }
                 }
-                .frame(height: isExpanded ? geometry.size.height : geometry.size.height * 0.6)
+                .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.6)
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
         }
-        .edgesIgnoringSafeArea(.bottom)
+        .ignoresSafeArea(edges: .bottom)
     }
 }
 
