@@ -6,9 +6,37 @@
 //
 
 import SwiftUI
+import Charts
+
+struct CategorySlice: Identifiable {
+    let id = UUID()
+    let name: String
+    let amount: Double
+    let color: Color
+}
+
+private let sampleSlices: [CategorySlice] = [
+    .init(name: "Food", amount: 120, color: .orange),
+    .init(name: "Transport", amount: 60, color: .blue),
+    .init(name: "Bills", amount: 90, color: .green)
+]
 
 struct DashboardView: View {
     @State private var isExpanded = false
+    
+    let food = Category(name: "Food", iconName: "fork.knife", colorHex: "#FF9500")
+    let transport = Category(name: "Transport", iconName: "tram.fill", colorHex: "#0A84FF")
+    let bills = Category(name: "Bills", iconName: "bolt.fill", colorHex: "#34C759")
+    let salary = Category(name: "Salary", iconName: "creditcard.fill", colorHex: "#AF52DE")
+    
+    private var sampleEntries: [Entry] {
+        [
+            Entry(type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
+            Entry(type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, category: transport, name: "Bus", account: "Cash"),
+            Entry(type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, category: bills, name: "Electricity", account: "Bank Account"),
+            Entry(type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account")
+        ]
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -24,9 +52,14 @@ struct DashboardView: View {
                                 VStack(spacing: 8) {
                                     Text("Spending Distribution")
                                         .font(.headline)
-                                    Text("Pie chart goes here")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                    Chart(sampleSlices) { slice in
+                                        SectorMark(
+                                            angle: .value("Amount", slice.amount),
+                                            innerRadius: .ratio(0.6)
+                                        )
+                                        .foregroundStyle(slice.color)
+                                    }
+                                    .frame(height: 180)
                                 }
                                 .padding()
                             )
@@ -48,24 +81,11 @@ struct DashboardView: View {
                 }
                 
                 ScrollView {
-                    VStack(spacing: 15) {
-                        VStack {
-                            DayHeader(date: "15th January", amount: 45)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                        }
-                        VStack {
-                            DayHeader(date: "15th January", amount: 45)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                        }
-                        VStack {
-                            DayHeader(date: "15th January", amount: 45)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
-                            Entry(description: "Dinner", account: "Bank Account", amount: 15)
+                    VStack(spacing: 12) {
+                        ForEach(sampleEntries.indices, id: \.self) { idx in
+                            let e = sampleEntries[idx]
+                            EntryRow(description: e.name, account: e.account, amount: e.amount)
+                                .padding(.horizontal)
                         }
                     }
                 }
@@ -95,7 +115,7 @@ struct DayHeader: View {
     }
 }
 
-struct Entry: View {
+struct EntryRow: View {
     let description: String
     let account: String
     let amount: Float
@@ -124,3 +144,4 @@ struct Entry: View {
 #Preview {
     DashboardView()
 }
+
