@@ -5,8 +5,8 @@
 //  Created by Anas Azman on 15/04/2026.
 //
 
-import SwiftUI
 import Charts
+import SwiftUI
 
 struct CategorySlice: Identifiable {
     let id = UUID()
@@ -23,12 +23,12 @@ private let sampleSlices: [CategorySlice] = [
 
 struct DashboardView: View {
     @State private var isExpanded = false
-    
+
     let food = Category(name: "Food", iconName: "fork.knife", colorHex: "#FF9500")
     let transport = Category(name: "Transport", iconName: "tram.fill", colorHex: "#0A84FF")
     let bills = Category(name: "Bills", iconName: "bolt.fill", colorHex: "#34C759")
     let salary = Category(name: "Salary", iconName: "creditcard.fill", colorHex: "#AF52DE")
-    
+
     private var sampleEntries: [Entry] {
         [
             Entry(type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
@@ -38,10 +38,16 @@ struct DashboardView: View {
         ]
     }
 
+    private var groupedEntries: [DateComponents: [Entry]] {
+        Dictionary(grouping: sampleEntries) { entry in
+            Calendar.current.dateComponents([.day, .year, .month], from: entry.date)
+        }
+    }
+
     var body: some View {
         GeometryReader { geometry in
             let topInset = geometry.safeAreaInsets.top
-            
+
             VStack(spacing: 0) {
                 if !isExpanded {
                     ZStack {
@@ -79,13 +85,13 @@ struct DashboardView: View {
                         .background(Color.gray.opacity(0.2))
                         .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
                 }
-                
+
                 ScrollView {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 5) {
+                        DayHeader(date: "15th January", amount: 150.00)
                         ForEach(sampleEntries.indices, id: \.self) { idx in
                             let e = sampleEntries[idx]
                             EntryRow(description: e.name, account: e.account, amount: e.amount)
-                                .padding(.horizontal)
                         }
                     }
                 }
@@ -119,7 +125,7 @@ struct EntryRow: View {
     let description: String
     let account: String
     let amount: Float
-    
+
     var body: some View {
         HStack {
             ZStack {
@@ -138,10 +144,11 @@ struct EntryRow: View {
             Text(amount, format: .currency(code: "MYR"))
                 .padding()
         }
+        .padding(5)
+        .background(Color.gray)
     }
 }
 
 #Preview {
     DashboardView()
 }
-
