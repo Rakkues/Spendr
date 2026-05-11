@@ -16,9 +16,9 @@ struct CategorySlice: Identifiable {
 }
 
 private let sampleSlices: [CategorySlice] = [
-    .init(name: "Food", amount: 120, color: .orange),
-    .init(name: "Transport", amount: 60, color: .blue),
-    .init(name: "Bills", amount: 90, color: .green)
+    .init(name: "Food", amount: 120, color: .flamingo),
+    .init(name: "Transport", amount: 60, color: .maroon),
+    .init(name: "Bills", amount: 90, color: .mauve)
 ]
 
 struct DashboardView: View {
@@ -34,7 +34,9 @@ struct DashboardView: View {
             Entry(type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
             Entry(type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, category: transport, name: "Bus", account: "Cash"),
             Entry(type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, category: bills, name: "Electricity", account: "Bank Account"),
-            Entry(type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account")
+            Entry(type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account"),
+            Entry(type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account"),
+            Entry(type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account")
         ]
     }
 
@@ -44,16 +46,23 @@ struct DashboardView: View {
         }
     }
 
+    private func formattedDate(from components: DateComponents) -> String {
+        guard let date = Calendar.current.date(from: components) else { return "Unknown Date" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         GeometryReader { geometry in
             let topInset = geometry.safeAreaInsets.top
 
             VStack(spacing: 0) {
                 if !isExpanded {
+                    // Pie chart
                     ZStack {
-                        // Placeholder for Pie Chart view
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.gray.opacity(0.12))
+                            .fill(Color.crust)
                             .overlay(
                                 VStack(spacing: 8) {
                                     Text("Spending Distribution")
@@ -73,25 +82,35 @@ struct DashboardView: View {
                     .frame(height: geometry.size.height * 0.3)
                 }
 
+                // Expand list button
                 Button(action: {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         isExpanded.toggle()
                     }
+                    print(groupedEntries)
                 }) {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
                         .font(.headline)
                         .padding(8)
                         .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
+                        .background(Color.surface1)
                         .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
                 }
 
+                // Date entries
                 ScrollView {
                     VStack(spacing: 5) {
-                        DayHeader(date: "15th January", amount: 150.00)
-                        ForEach(sampleEntries.indices, id: \.self) { idx in
-                            let e = sampleEntries[idx]
-                            EntryRow(description: e.name, account: e.account, amount: e.amount)
+                        ForEach(groupedEntries.sorted(by: { lhs, rhs in
+                            // Sort by date, descending (latest first)
+                            let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
+                            let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
+                            return lhsDate > rhsDate
+                        }), id: \.key) { dateComponents, entries in
+                            DayHeader(date: formattedDate(from: dateComponents), amount: Float(entries.reduce(0) { $0 + $1.amount }))
+                            ForEach(entries.indices, id: \.self) { idx in
+                                let e = entries[idx]
+                                EntryRow(description: e.name, account: e.account, amount: Float(e.amount))
+                            }
                         }
                     }
                 }
@@ -103,6 +122,7 @@ struct DashboardView: View {
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
         }
         .ignoresSafeArea(edges: .bottom)
+        .background(Color.base)
     }
 }
 
@@ -117,7 +137,7 @@ struct DayHeader: View {
             Text(amount, format: .currency(code: "MYR"))
         }
         .padding()
-        .background(Color.gray)
+        .background(Color.surface0)
     }
 }
 
@@ -145,7 +165,7 @@ struct EntryRow: View {
                 .padding()
         }
         .padding(5)
-        .background(Color.gray)
+        .background(Color.surface1)
     }
 }
 
