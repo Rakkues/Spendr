@@ -8,6 +8,32 @@
 import Charts
 import SwiftUI
 
+extension Color {
+    init(hex: String) {
+        var hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
+
 struct CategorySlice: Identifiable {
     let id = UUID()
     let name: String
@@ -109,20 +135,20 @@ struct DashboardView: View {
                 }
 
                 // Date entries
-                ScrollView {
-                    VStack(spacing: 5) {
-                        ForEach(groupedEntries.sorted(by: { lhs, rhs in
-                            let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
-                            let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
-                            return lhsDate > rhsDate
-                        }), id: \.key) { dateComponents, dayEntries in
-                            DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense)
-                        }
+                List {
+                    ForEach(groupedEntries.sorted(by: { lhs, rhs in
+                        let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
+                        let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
+                        return lhsDate > rhsDate
+                    }), id: \.key) { dateComponents, dayEntries in
+                        DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense)
                     }
+                    .listRowInsets(EdgeInsets())
                 }
+                .listStyle(.plain)
                 .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.6)
-                .contentShape(Rectangle())
                 .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
@@ -153,15 +179,15 @@ struct EntryRow: View {
     let account: String
     let amount: Double
     let type: EntryType
-    let icon: String
+    let category: Category
 
     var body: some View {
         HStack {
             ZStack {
                 Circle()
                     .scale(1)
-                    .fill(Color.blue)
-                Image(systemName: icon)
+                    .fill(Color(hex: category.colorHex))
+                Image(systemName: category.iconName)
             }
             .frame(maxWidth: 75)
             VStack(alignment: .leading) {
@@ -203,16 +229,17 @@ struct DateEntries: View {
     }
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 0) {
             DayHeader(
                 date: formattedDate(from: entry.key),
                 amount: netExpense
             )
             ForEach(entry.value.indices, id: \.self) { idx in
                 let e = entry.value[idx]
-                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, icon: e.category.iconName)
+                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, category: e.category)
             }
         }
+        .padding(.bottom, 5)
     }
 }
 
