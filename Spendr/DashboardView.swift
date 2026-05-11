@@ -46,13 +46,6 @@ struct DashboardView: View {
         }
     }
 
-    private func formattedDate(from components: DateComponents) -> String {
-        guard let date = Calendar.current.date(from: components) else { return "Unknown Date" }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
-
     var body: some View {
         GeometryReader { geometry in
             let topInset = geometry.safeAreaInsets.top
@@ -101,16 +94,11 @@ struct DashboardView: View {
                 ScrollView {
                     VStack(spacing: 5) {
                         ForEach(groupedEntries.sorted(by: { lhs, rhs in
-                            // Sort by date, descending (latest first)
                             let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
                             let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
                             return lhsDate > rhsDate
                         }), id: \.key) { dateComponents, entries in
-                            DayHeader(date: formattedDate(from: dateComponents), amount: Float(entries.reduce(0) { $0 + $1.amount }))
-                            ForEach(entries.indices, id: \.self) { idx in
-                                let e = entries[idx]
-                                EntryRow(description: e.name, account: e.account, amount: Float(e.amount))
-                            }
+                            DateEntries(entry: (key: dateComponents, value: entries))
                         }
                     }
                 }
@@ -166,6 +154,30 @@ struct EntryRow: View {
         }
         .padding(5)
         .background(Color.surface1)
+    }
+}
+
+struct DateEntries: View {
+    let entry: (key: DateComponents, value: [Entry])
+
+    private func formattedDate(from components: DateComponents) -> String {
+        guard let date = Calendar.current.date(from: components) else { return "Unknown Date" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
+    var body: some View {
+        VStack(spacing: 5) {
+            DayHeader(
+                date: formattedDate(from: entry.key),
+                amount: Float(entry.value.reduce(0) { $0 + $1.amount })
+            )
+            ForEach(entry.value.indices, id: \.self) { idx in
+                let e = entry.value[idx]
+                EntryRow(description: e.name, account: e.account, amount: Float(e.amount))
+            }
+        }
     }
 }
 
