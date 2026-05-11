@@ -153,6 +153,7 @@ struct EntryRow: View {
     let account: String
     let amount: Double
     let type: EntryType
+    let icon: String
 
     var body: some View {
         HStack {
@@ -160,7 +161,7 @@ struct EntryRow: View {
                 Circle()
                     .scale(1)
                     .fill(Color.blue)
-                Image(systemName: "fork.knife")
+                Image(systemName: icon)
             }
             .frame(maxWidth: 75)
             VStack(alignment: .leading) {
@@ -209,7 +210,7 @@ struct DateEntries: View {
             )
             ForEach(entry.value.indices, id: \.self) { idx in
                 let e = entry.value[idx]
-                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type)
+                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, icon: e.category.iconName)
             }
         }
     }
