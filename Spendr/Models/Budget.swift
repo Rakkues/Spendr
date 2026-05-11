@@ -9,7 +9,7 @@ import Foundation
 
 struct Budget: Identifiable {
     let id = UUID()
-    var amount: Float
+    var amount: Double
     var category: Category
     var month: Int
     var year: Int

@@ -21,6 +21,11 @@ private let sampleSlices: [CategorySlice] = [
     .init(name: "Bills", amount: 90, color: .mauve)
 ]
 
+struct DayEntries {
+    let entries: [Entry]
+    let netExpense: Double
+}
+
 struct DashboardView: View {
     @State private var isExpanded = false
 
@@ -40,9 +45,22 @@ struct DashboardView: View {
         ]
     }
 
-    private var groupedEntries: [DateComponents: [Entry]] {
-        Dictionary(grouping: sampleEntries) { entry in
+    private var groupedEntries: [DateComponents: DayEntries] {
+        let grouped = Dictionary(grouping: sampleEntries) { entry in
             Calendar.current.dateComponents([.day, .year, .month], from: entry.date)
+        }
+        return grouped.mapValues { entries in
+            let net = entries.reduce(0.0) { sum, entry in
+                switch entry.type {
+                case .income:
+                    return sum + Double(entry.amount)
+                case .expense:
+                    return sum - Double(entry.amount)
+                case .transfer:
+                    return sum
+                }
+            }
+            return DayEntries(entries: entries, netExpense: net)
         }
     }
 
@@ -97,8 +115,8 @@ struct DashboardView: View {
                             let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
                             let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
                             return lhsDate > rhsDate
-                        }), id: \.key) { dateComponents, entries in
-                            DateEntries(entry: (key: dateComponents, value: entries))
+                        }), id: \.key) { dateComponents, dayEntries in
+                            DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense)
                         }
                     }
                 }
@@ -111,12 +129,13 @@ struct DashboardView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .background(Color.base)
+        .foregroundColor(.text)
     }
 }
 
 struct DayHeader: View {
     let date: String
-    let amount: Float
+    let amount: Double
 
     var body: some View {
         HStack {
@@ -132,7 +151,8 @@ struct DayHeader: View {
 struct EntryRow: View {
     let description: String
     let account: String
-    let amount: Float
+    let amount: Double
+    let type: EntryType
 
     var body: some View {
         HStack {
@@ -149,8 +169,21 @@ struct EntryRow: View {
                     .font(.system(size: 11))
             }
             Spacer()
-            Text(amount, format: .currency(code: "MYR"))
-                .padding()
+
+            switch type {
+            case .income:
+                Text(amount, format: .currency(code: "MYR"))
+                    .padding()
+                    .foregroundStyle(Color.sky)
+            case .expense:
+                Text(-amount, format: .currency(code: "MYR"))
+                    .padding()
+                    .foregroundStyle(Color.catRed)
+            case .transfer:
+                Text(amount, format: .currency(code: "MYR"))
+                    .padding()
+                    .foregroundStyle(Color.catGreen)
+            }
         }
         .padding(5)
         .background(Color.surface1)
@@ -159,6 +192,7 @@ struct EntryRow: View {
 
 struct DateEntries: View {
     let entry: (key: DateComponents, value: [Entry])
+    let netExpense: Double
 
     private func formattedDate(from components: DateComponents) -> String {
         guard let date = Calendar.current.date(from: components) else { return "Unknown Date" }
@@ -171,11 +205,11 @@ struct DateEntries: View {
         VStack(spacing: 5) {
             DayHeader(
                 date: formattedDate(from: entry.key),
-                amount: Float(entry.value.reduce(0) { $0 + $1.amount })
+                amount: netExpense
             )
             ForEach(entry.value.indices, id: \.self) { idx in
                 let e = entry.value[idx]
-                EntryRow(description: e.name, account: e.account, amount: Float(e.amount))
+                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type)
             }
         }
     }
