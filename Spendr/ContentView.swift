@@ -13,11 +13,17 @@ struct ContentView: View {
             Tab("Dashboard", systemImage: "house") {
                 DashboardView()
             }
+            
             Tab("Statistics", systemImage: "chart.bar.fill") {
                 StatisticsView()
             }
+            
             Tab("Settings", systemImage: "gear") {
                 SettingsView()
+            }
+            
+            Tab("", systemImage: "plus", role: .search) {
+                AddEntryView()
             }
         }
     }
