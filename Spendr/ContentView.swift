@@ -8,25 +8,32 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var authViewModel = AuthViewModel()
     var body: some View {
-        TabView {
-            Tab("Dashboard", systemImage: "house") {
-                DashboardView()
-            }
+        Group {
+            if authViewModel.isAuthenticated {
+                TabView {
+                    Tab("Dashboard", systemImage: "house") {
+                        DashboardView()
+                    }
             
-            Tab("Statistics", systemImage: "chart.bar.fill") {
-                StatisticsView()
-            }
+                    Tab("Statistics", systemImage: "chart.bar.fill") {
+                        StatisticsView()
+                    }
             
-            Tab("Settings", systemImage: "gear") {
-                SettingsView()
-            }
+                    Tab("Settings", systemImage: "gear") {
+                        SettingsView()
+                    }
             
-            Tab("", systemImage: "plus", role: .search) {
-                AddEntryView()
+                    Tab("", systemImage: "plus", role: .search) {
+                        AddEntryView()
+                    }
+                }
+            } else {
+                LoginView(authViewModel: authViewModel)
             }
         }
-    }
+      }
 }
 
 #Preview {

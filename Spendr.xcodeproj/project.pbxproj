@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		9492D1342F8F593A00DF3CB0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9492D1332F8F593A00DF3CB0 /* README.md */; };
+		94E4EEAC2FB8A4B800D52768 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEAB2FB8A4B800D52768 /* Auth */; };
+		94E4EEAE2FB8A4B800D52768 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEAD2FB8A4B800D52768 /* Functions */; };
+		94E4EEB02FB8A4B800D52768 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEAF2FB8A4B800D52768 /* PostgREST */; };
+		94E4EEB22FB8A4B800D52768 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEB12FB8A4B800D52768 /* Realtime */; };
+		94E4EEB42FB8A4B800D52768 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEB32FB8A4B800D52768 /* Storage */; };
+		94E4EEB62FB8A4B800D52768 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 94E4EEB52FB8A4B800D52768 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +34,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94E4EEB02FB8A4B800D52768 /* PostgREST in Frameworks */,
+				94E4EEAE2FB8A4B800D52768 /* Functions in Frameworks */,
+				94E4EEB62FB8A4B800D52768 /* Supabase in Frameworks */,
+				94E4EEAC2FB8A4B800D52768 /* Auth in Frameworks */,
+				94E4EEB42FB8A4B800D52768 /* Storage in Frameworks */,
+				94E4EEB22FB8A4B800D52768 /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -39,6 +51,7 @@
 			children = (
 				9492D1332F8F593A00DF3CB0 /* README.md */,
 				9492D0AB2F868E4F00DF3CB0 /* Spendr */,
+				94E4EEAA2FB8A4B800D52768 /* Frameworks */,
 				9492D0AA2F868E4F00DF3CB0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -49,6 +62,13 @@
 				9492D0A92F868E4F00DF3CB0 /* Spendr.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		94E4EEAA2FB8A4B800D52768 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -71,6 +91,12 @@
 			);
 			name = Spendr;
 			packageProductDependencies = (
+				94E4EEAB2FB8A4B800D52768 /* Auth */,
+				94E4EEAD2FB8A4B800D52768 /* Functions */,
+				94E4EEAF2FB8A4B800D52768 /* PostgREST */,
+				94E4EEB12FB8A4B800D52768 /* Realtime */,
+				94E4EEB32FB8A4B800D52768 /* Storage */,
+				94E4EEB52FB8A4B800D52768 /* Supabase */,
 			);
 			productName = Spendr;
 			productReference = 9492D0A92F868E4F00DF3CB0 /* Spendr.app */;
@@ -349,6 +375,39 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		94E4EEAB2FB8A4B800D52768 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		94E4EEAD2FB8A4B800D52768 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		94E4EEAF2FB8A4B800D52768 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		94E4EEB12FB8A4B800D52768 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		94E4EEB32FB8A4B800D52768 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		94E4EEB52FB8A4B800D52768 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94E4EEA12FB8A1F500D52768 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9492D0A12F868E4F00DF3CB0 /* Project object */;
 }
