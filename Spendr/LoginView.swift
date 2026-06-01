@@ -5,6 +5,7 @@
 //  Created by Anas Azman on 18/05/2026.
 //
 
+import AuthenticationServices
 import SwiftUI
 
 /// Simple email/password sign-in and sign-up form.
@@ -17,8 +18,9 @@ struct LoginView: View {
     @State private var password = ""
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 15) {
                 Text("Login")
+                    .dynamicTypeSize(.xxxLarge)
                 
                 TextField("Email", text: $email)
                     .textFieldStyle(.roundedBorder)
@@ -38,19 +40,20 @@ struct LoginView: View {
                     Text("Sign In")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                
+                .buttonStyle(.glassProminent)
+               }
+            .padding(20)
+            HStack {
                 Text("Don't have an account?")
                 NavigationLink("Sign Up") {
-                        SignUpView(authViewModel: authViewModel)
+                    SignUpView(authViewModel: authViewModel)
                 }
-            }
-            .padding(20)
+             }
         }
-      }
+    }
 }
 
- #Preview {
+#Preview {
     let mock = AuthViewModel()
     LoginView(authViewModel: mock)
- }
+}

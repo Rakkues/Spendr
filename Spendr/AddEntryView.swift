@@ -8,57 +8,105 @@
 import SwiftUI
 
 struct AddEntryView: View {
-    
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var date = Date()
+    @State private var name = ""
+    @State private var type = "Expense"
+    @State private var entryName = ""
+    @State private var account = ""
+    @State private var amount = 0
+
+    private let entryTypes = ["Expense", "Income", "Transfer"]
+
+    private var doubleFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        return formatter
+    }
+
     var body: some View {
-        Form {
-            // Type (Static)
-            HStack {
-                Text("Type")
-                Spacer()
-                Text("Expense")
-                    .foregroundColor(.secondary)
+        VStack(spacing: 20) {
+            Grid {
+                GridRow {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                    }
+                    .controlSize(.large)
+                    .buttonStyle(.glass)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    
+                    
+                    Text("Add New Entry")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                    
+                    Spacer()
+                        .frame(maxWidth: .infinity)
+                }
             }
+            .frame(maxHeight: 20)
+            .padding(.vertical, 5)
 
-            // Date (Static)
-            HStack {
-                Text("Date")
-                Spacer()
-                Text(Date.now, style: .date)
-                    .foregroundColor(.secondary)
+            Picker("Entry Type", selection: $type) {
+                ForEach(entryTypes, id: \.self) { entryType in
+                    Text(entryType)
+                }
             }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
 
-            // Name (Static)
-            HStack {
-                Text("Name")
-                Spacer()
-                Text("Coffee")
-                    .foregroundColor(.secondary)
-            }
+            VStack(spacing: 30) {
+                DatePicker("Date", selection: $date, displayedComponents: [.date])
 
-            // Account (Static)
-            HStack {
-                Text("Account")
-                Spacer()
-                Text("Cash")
-                    .foregroundColor(.secondary)
-            }
+                HStack {
+                    Text("Name")
+                    Spacer()
+                    TextField("", text: $name)
+                        .frame(maxWidth: 270)
+                }
 
-            // Amount (Static)
-            HStack {
-                Text("Amount")
-                Spacer()
-                Text("12.00")
-                    .foregroundColor(.secondary)
-            }
+                HStack {
+                    Text("Account")
+                    Spacer()
+                    TextField("", text: $account)
+                        .frame(maxWidth: 270)
+                }
 
-            // Category Placeholder (Static)
-            HStack {
-                Text("Category")
-                Spacer()
-                Text("Select category")
-                    .foregroundColor(.secondary)
+                HStack {
+                    Text("Amount")
+                    Spacer()
+                    TextField("", value: $amount, formatter: doubleFormatter)
+                        .frame(maxWidth: 270)
+                }
+
+                HStack {
+                    Text("Category")
+                    Spacer()
+                    Text("Select category")
+                        .foregroundColor(.secondary)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .padding(20)
+            .background(Color.base)
+
+            Button(action: addEntry) {
+                Label("Add Entry", systemImage: "plus")
+                    .frame(maxWidth: 300)
+            }
+            .padding(.top, 10)
+            .buttonStyle(.glassProminent)
+            .controlSize(.large)
         }
+        .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private func addEntry() {
+        Task {}
     }
 }
 

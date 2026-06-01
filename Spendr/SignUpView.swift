@@ -58,7 +58,7 @@ struct SignUpView: View { // Reference to the shared auth view model for perform
                 Text("Sign Up")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
         }
         .padding(20)
     }
