@@ -8,9 +8,20 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+        Button {
+            Task {
+                await authViewModel.signOut()
+            }
+        } label: {
+            Text("Sign Out")
+                .frame(maxWidth: 300)
+        }
+        .buttonStyle(.glass)
+        .foregroundStyle(Color.red)
+       }
 }
 
 #Preview {

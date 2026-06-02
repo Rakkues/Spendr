@@ -5,13 +5,13 @@
 //  Created by Anas Azman on 18/05/2026.
 //
 
-import Foundation
-import SwiftUI
-import Supabase
 import Combine
+import Foundation
+import Supabase
+import SwiftUI
 
-@MainActor
 /// View model responsible for handling authentication state and actions using Supabase.
+@MainActor
 class AuthViewModel: ObservableObject {
     /// The current authenticated session if available. Nil when logged out or pending email confirmation.
     @Published var session: Session?
@@ -38,8 +38,8 @@ class AuthViewModel: ObservableObject {
         // Create a new user account. Depending on Supabase settings, email confirmation may be required.
         do {
             // Debounce repeated taps while a request is already in progress.
-            guard !isLoading else { return }
-            isLoading = true
+            guard !self.isLoading else { return }
+            self.isLoading = true
             defer { isLoading = false }
 
             // Perform sign-up; response.session can be nil if email confirmation is enabled.
@@ -61,8 +61,8 @@ class AuthViewModel: ObservableObject {
         // Sign in an existing user with email/password and update session.
         do {
             // Avoid overlapping sign-in attempts.
-            guard !isLoading else { return }
-            isLoading = true
+            guard !self.isLoading else { return }
+            self.isLoading = true
             defer { isLoading = false }
 
             // On success, Supabase returns a non-optional Session.
@@ -73,6 +73,12 @@ class AuthViewModel: ObservableObject {
             self.isAuthenticated = true
             // Keep the previous logging style for consistency (will be "present" on success).
             print("SignIn: session is \(self.session == nil ? "nil" : "present")")
+            
+            try await supabase
+                .rpc("seed_user_defaults", params: ["authenticated_user_id": session.user.id])
+                .execute()
+                        
+            print("Database seeding verification complete.")
             
         } catch {
             // Reset to a clean unauthenticated state if sign-in fails.

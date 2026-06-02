@@ -29,6 +29,7 @@ struct ContentView: View {
                         AddEntryView()
                     }
                 }
+                .environmentObject(authViewModel)
             } else {
                 LoginView(authViewModel: authViewModel)
             }

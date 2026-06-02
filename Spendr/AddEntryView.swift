@@ -15,7 +15,7 @@ struct AddEntryView: View {
     @State private var type = "Expense"
     @State private var entryName = ""
     @State private var account = ""
-    @State private var amount = 0
+    @State private var amount = 0.0
 
     private let entryTypes = ["Expense", "Income", "Transfer"]
 
