@@ -55,19 +55,19 @@ struct DayEntries {
 struct DashboardView: View {
     @State private var isExpanded = false
 
-    let food = Category(name: "Food", iconName: "fork.knife", colorHex: "#FF9500")
-    let transport = Category(name: "Transport", iconName: "tram.fill", colorHex: "#0A84FF")
-    let bills = Category(name: "Bills", iconName: "bolt.fill", colorHex: "#34C759")
-    let salary = Category(name: "Salary", iconName: "creditcard.fill", colorHex: "#AF52DE")
+    let food = Category(id: UUID(), name: "Food", iconName: "fork.knife", colorHex: "#FF9500")
+    let transport = Category(id: UUID(), name: "Transport", iconName: "tram.fill", colorHex: "#0A84FF")
+    let bills = Category(id: UUID(), name: "Bills", iconName: "bolt.fill", colorHex: "#34C759")
+    let salary = Category(id: UUID(), name: "Salary", iconName: "creditcard.fill", colorHex: "#AF52DE")
 
     private var sampleEntries: [Entry] {
         [
-            Entry(type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
-            Entry(type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, category: transport, name: "Bus", account: "Cash"),
-            Entry(type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, category: bills, name: "Electricity", account: "Bank Account"),
-            Entry(type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account"),
-            Entry(type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account"),
-            Entry(type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account")
+            Entry(id: UUID(), type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
+            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, category: transport, name: "Bus", account: "Cash"),
+            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, category: bills, name: "Electricity", account: "Bank Account"),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account"),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account"),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account")
         ]
     }
 

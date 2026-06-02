@@ -16,7 +16,7 @@ struct ContentView: View {
             if authViewModel.isAuthenticated {
                 TabView {
                     Tab("Dashboard", systemImage: "house") {
-                        DashboardView()
+//                        DashboardView()
                     }
             
                     Tab("Statistics", systemImage: "chart.bar.fill") {
