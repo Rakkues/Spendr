@@ -9,21 +9,7 @@ import SwiftUI
 
 struct AddEntryView: View {
     @Environment(\.dismiss) private var dismiss
-
-    @State private var date = Date()
-    @State private var name = ""
-    @State private var type = "Expense"
-    @State private var entryName = ""
-    @State private var account = ""
-    @State private var amount = 0.0
-
-    private let entryTypes = ["Expense", "Income", "Transfer"]
-
-    private var doubleFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        return formatter
-    }
+    @ObservedObject var viewModel: AddEntryViewModel
 
     var body: some View {
         VStack(spacing: 20) {
@@ -50,9 +36,9 @@ struct AddEntryView: View {
             .frame(maxHeight: 20)
             .padding(.vertical, 5)
 
-            Picker("Entry Type", selection: $type) {
-                ForEach(entryTypes, id: \.self) { entryType in
-                    Text(entryType)
+            Picker("Entry Type", selection: $viewModel.type) {
+                ForEach(EntryType.allCases, id: \.self) { entryType in
+                    Text(entryType.rawValue)
                 }
             }
             .pickerStyle(.segmented)
@@ -60,26 +46,26 @@ struct AddEntryView: View {
             .padding(.vertical, 10)
 
             VStack(spacing: 30) {
-                DatePicker("Date", selection: $date, displayedComponents: [.date])
+                DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
 
                 HStack {
                     Text("Name")
                     Spacer()
-                    TextField("", text: $name)
+                    TextField("", text: $viewModel.name)
                         .frame(maxWidth: 270)
                 }
 
                 HStack {
                     Text("Account")
                     Spacer()
-                    TextField("", text: $account)
+                    TextField("", text: $viewModel.account)
                         .frame(maxWidth: 270)
                 }
 
                 HStack {
                     Text("Amount")
                     Spacer()
-                    TextField("", value: $amount, formatter: doubleFormatter)
+                    TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
                         .frame(maxWidth: 270)
                 }
 
@@ -111,5 +97,6 @@ struct AddEntryView: View {
 }
 
 #Preview {
-    AddEntryView()
+    let mock = AddEntryViewModel()
+    AddEntryView(viewModel: mock)
 }

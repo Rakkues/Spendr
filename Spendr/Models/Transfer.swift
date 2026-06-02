@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct Transfer : Identifiable {
-    let id = UUID()
-    var date: Date
-    var fromEntry: Entry
-    var toEntry: Entry
+struct Transfer : Identifiable, Decodable {
+    let id: UUID
+    let date: Date
+    let fromEntry: Entry
+    let toEntry: Entry
 }

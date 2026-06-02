@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct Category: Identifiable {
-    var id = UUID()
-    var name: String
-    var iconName: String
-    var colorHex: String
+struct Category: Identifiable, Decodable {
+    let id:  UUID
+    let name: String
+    let iconName: String
+    let colorHex: String
 }

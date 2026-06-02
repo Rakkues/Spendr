@@ -7,18 +7,18 @@
 
 import Foundation
 
-enum EntryType {
-    case expense
-    case income
-    case transfer
+enum EntryType: String, CaseIterable, Decodable  {
+    case expense = "Expense"
+    case income = "Income"
+    case transfer = "Transfer"
 }
 
-struct Entry: Identifiable {
-    let id = UUID()
-    var type: EntryType
-    var date: Date
-    var amount: Double
-    var category: Category
-    var name: String
-    var account: String
+struct Entry: Identifiable, Decodable {
+    let id: UUID
+    let type: EntryType
+    let date: Date
+    let amount: Double
+    let category: Category
+    let name: String
+    let account: String
 }

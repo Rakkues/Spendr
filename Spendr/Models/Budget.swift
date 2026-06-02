@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Budget: Identifiable {
-    let id = UUID()
-    var amount: Double
-    var category: Category
-    var month: Int
-    var year: Int
+struct Budget: Identifiable, Decodable {
+    let id: UUID
+    let amount: Double
+    let category: Category
+    let month: Int
+    let year: Int
 }

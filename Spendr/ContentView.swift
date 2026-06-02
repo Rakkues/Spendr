@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var addEntryViewModel = AddEntryViewModel()
+    
     var body: some View {
         Group {
             if authViewModel.isAuthenticated {
@@ -26,7 +28,7 @@ struct ContentView: View {
                     }
             
                     Tab("", systemImage: "plus", role: .search) {
-                        AddEntryView()
+                        AddEntryView(viewModel: addEntryViewModel)
                     }
                 }
                 .environmentObject(authViewModel)
