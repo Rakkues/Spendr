@@ -61,7 +61,6 @@ class AddEntryViewModel: ObservableObject {
         }
         
         let userId = user.id.uuidString.lowercased()
-        print(userId)
         
         do {
             // 1. Fetch the raw response data
