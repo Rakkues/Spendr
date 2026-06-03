@@ -10,6 +10,7 @@ import SwiftUI
 struct AddEntryView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: AddEntryViewModel
+    @State private var selectedCategory: Category?
 
     var body: some View {
         VStack(spacing: 20) {
@@ -23,12 +24,11 @@ struct AddEntryView: View {
                     .buttonStyle(.glass)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
-                    
-                    
+
                     Text("Add New Entry")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
-                    
+
                     Spacer()
                         .frame(maxWidth: .infinity)
                 }
@@ -72,8 +72,25 @@ struct AddEntryView: View {
                 HStack {
                     Text("Category")
                     Spacer()
-                    Text("Select category")
-                        .foregroundColor(.secondary)
+                    Picker("Category", selection: $selectedCategory) {
+                        // 1. Show a placeholder if no data is loaded yet
+                        if viewModel.categories.isEmpty {
+                            Text("Loading categories...").tag(nil as Category?)
+                        } else {
+                            Text("Select a category").tag(nil as Category?)
+                        }
+
+                        // 2. Loop through the fetched categories
+                        ForEach(viewModel.categories) { category in
+                            Text(category.name)
+                                .tag(category as Category?) // Tag allows SwiftUI to track selection
+                        }
+                    }
+                    .pickerStyle(.menu) // Makes it look like a standard iOS dropdown menu
+                    .buttonStyle(.bordered) // Gives the dropdown a clean, tappable border
+                }
+                .task {
+                    await viewModel.fetchCategories()
                 }
             }
             .frame(maxWidth: .infinity)

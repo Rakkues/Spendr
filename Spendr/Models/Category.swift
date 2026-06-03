@@ -7,9 +7,10 @@
 
 import Foundation
 
-struct Category: Identifiable, Decodable {
+struct Category: Identifiable, Decodable, Hashable {
     let id:  UUID
     let name: String
+    let userId: UUID
     let iconName: String
     let colorHex: String
 }

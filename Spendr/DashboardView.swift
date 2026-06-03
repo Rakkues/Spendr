@@ -55,10 +55,10 @@ struct DayEntries {
 struct DashboardView: View {
     @State private var isExpanded = false
 
-    let food = Category(id: UUID(), name: "Food", iconName: "fork.knife", colorHex: "#FF9500")
-    let transport = Category(id: UUID(), name: "Transport", iconName: "tram.fill", colorHex: "#0A84FF")
-    let bills = Category(id: UUID(), name: "Bills", iconName: "bolt.fill", colorHex: "#34C759")
-    let salary = Category(id: UUID(), name: "Salary", iconName: "creditcard.fill", colorHex: "#AF52DE")
+    let food = Category(id: UUID(), name: "Food", userId: UUID(), iconName: "fork.knife", colorHex: "#FF9500")
+    let transport = Category(id: UUID(), name: "Transport", userId: UUID(), iconName: "tram.fill", colorHex: "#0A84FF")
+    let bills = Category(id: UUID(), name: "Bills", userId: UUID(), iconName: "bolt.fill", colorHex: "#34C759")
+    let salary = Category(id: UUID(), name: "Salary", userId: UUID(), iconName: "creditcard.fill", colorHex: "#AF52DE")
 
     private var sampleEntries: [Entry] {
         [
