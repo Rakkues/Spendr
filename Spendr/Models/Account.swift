@@ -7,9 +7,8 @@
 
 import Foundation
 
-struct Account: Identifiable, Decodable {
+struct Account: Identifiable, Decodable, Hashable {
     let id: UUID
     let name: String
     let currencyCode: String
-    let entries: [Entry]
 }

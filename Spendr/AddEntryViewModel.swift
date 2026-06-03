@@ -17,8 +17,12 @@ class AddEntryViewModel: ObservableObject {
     @Published var entryName = ""
     @Published var account = ""
     @Published var amount = 0.0
+    
     @Published var categories: [Category] = []
+    @Published var selectedCategory: Category?
+    
     @Published var accounts: [Account] = []
+    @Published var selectedAccount: Account?
     
     @Published var errorMessage: String?
     
@@ -29,7 +33,6 @@ class AddEntryViewModel: ObservableObject {
         }
         
         let userId = user.id.uuidString.lowercased()
-        print(userId)
         
         do {
             // 1. Fetch the raw response data
@@ -51,7 +54,34 @@ class AddEntryViewModel: ObservableObject {
         }
     }
     
-    func fetchAccounts() async {}
+    func fetchAccounts() async {
+        guard let user = supabase.auth.currentUser else {
+            self.errorMessage = "No user logged in"
+            return
+        }
+        
+        let userId = user.id.uuidString.lowercased()
+        print(userId)
+        
+        do {
+            // 1. Fetch the raw response data
+            let response = try await supabase
+                .from("accounts")
+                .select("*")
+                .eq("user_id", value: userId)
+                .execute()
+                        
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        
+            let fetchedAccounts = try decoder.decode([Account].self, from: response.data)
+                        
+            self.accounts = fetchedAccounts
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("Error fetching categories: \(error)")
+        }
+    }
 
     var doubleFormatter: NumberFormatter {
         let formatter = NumberFormatter()
