@@ -55,19 +55,19 @@ struct DayEntries {
 struct DashboardView: View {
     @State private var isExpanded = false
 
-    let food = Category(id: UUID(), name: "Food", userId: UUID(), iconName: "fork.knife", colorHex: "#FF9500")
-    let transport = Category(id: UUID(), name: "Transport", userId: UUID(), iconName: "tram.fill", colorHex: "#0A84FF")
-    let bills = Category(id: UUID(), name: "Bills", userId: UUID(), iconName: "bolt.fill", colorHex: "#34C759")
-    let salary = Category(id: UUID(), name: "Salary", userId: UUID(), iconName: "creditcard.fill", colorHex: "#AF52DE")
+    let food = Category(id: UUID(), name: "Food", userId: UUID(), iconName: "fork.knife", colorHex: "#FF9500", entryType: .expense)
+    let transport = Category(id: UUID(), name: "Transport", userId: UUID(), iconName: "tram.fill", colorHex: "#0A84FF", entryType: .expense)
+    let bills = Category(id: UUID(), name: "Bills", userId: UUID(), iconName: "bolt.fill", colorHex: "#34C759", entryType: .expense)
+    let salary = Category(id: UUID(), name: "Salary", userId: UUID(), iconName: "creditcard.fill", colorHex: "#AF52DE", entryType: .expense)
 
     private var sampleEntries: [Entry] {
         [
-            Entry(id: UUID(), type: .expense, date: Date(), amount: 15.0, category: food, name: "Dinner", account: "Bank Account"),
-            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, category: transport, name: "Bus", account: "Cash"),
-            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, category: bills, name: "Electricity", account: "Bank Account"),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, category: salary, name: "Freelance", account: "Bank Account"),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account"),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, category: salary, name: "Freelance", account: "Bank Account")
+            Entry(id: UUID(), type: .expense, date: Date(), amount: 15.0, categoryId: food.id, name: "Dinner", accountId: UUID()),
+            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, categoryId: transport.id, name: "Bus", accountId: UUID()),
+            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, categoryId: bills.id, name: "Electricity", accountId: UUID()),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, categoryId: salary.id, name: "Freelance", accountId: UUID()),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, categoryId: salary.id, name: "Freelance", accountId: UUID()),
+            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, categoryId: salary.id, name: "Freelance", accountId: UUID())
         ]
     }
 
@@ -234,10 +234,10 @@ struct DateEntries: View {
                 date: formattedDate(from: entry.key),
                 amount: netExpense
             )
-            ForEach(entry.value.indices, id: \.self) { idx in
-                let e = entry.value[idx]
-                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, category: e.category)
-            }
+//            ForEach(entry.value.indices, id: \.self) { idx in
+//                let e = entry.value[idx]
+//                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, category: e.category)
+//            }
         }
         .padding(.bottom, 5)
     }

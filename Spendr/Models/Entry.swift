@@ -7,18 +7,32 @@
 
 import Foundation
 
-enum EntryType: String, CaseIterable, Decodable  {
-    case expense = "Expense"
-    case income = "Income"
-    case transfer = "Transfer"
+enum EntryType: String, CaseIterable, Codable {
+    case expense = "expense"
+    case income = "income"
+    case transfer = "transfer"
+    
+    var displayName: String {
+        rawValue.capitalized
+    }
 }
 
-struct Entry: Identifiable, Decodable {
+struct Entry: Identifiable, Codable {
     let id: UUID
     let type: EntryType
     let date: Date
     let amount: Double
-    let category: Category
+    let categoryId: UUID
     let name: String
-    let account: String
+    let accountId: UUID
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case date
+        case amount
+        case categoryId = "category_id"
+        case name
+        case accountId = "account_id" // map to snake_case for JSON
+    }
 }

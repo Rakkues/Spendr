@@ -7,10 +7,11 @@
 
 import Foundation
 
-struct Category: Identifiable, Decodable, Hashable {
+struct Category: Identifiable, Codable, Hashable {
     let id:  UUID
     let name: String
     let userId: UUID
     let iconName: String
     let colorHex: String
+    let entryType: EntryType
 }

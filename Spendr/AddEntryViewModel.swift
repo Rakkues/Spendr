@@ -40,6 +40,7 @@ class AddEntryViewModel: ObservableObject {
                 .from("categories")
                 .select("*")
                 .eq("user_id", value: userId)
+                .eq("entry_type", value: type.rawValue)
                 .execute()
                         
             let decoder = JSONDecoder()
@@ -81,10 +82,59 @@ class AddEntryViewModel: ObservableObject {
             print("Error fetching categories: \(error)")
         }
     }
+    
+    func addEntry() async {
+        // Validate inputs
+        guard let account = selectedAccount else {
+            self.errorMessage = "Please select an account."
+            return
+        }
+        guard let category = selectedCategory else {
+            self.errorMessage = "Please select a category."
+            return
+        }
+        guard amount > 0 else {
+            self.errorMessage = "Amount must be greater than zero."
+            return
+        }
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            self.errorMessage = "Please enter a name."
+            return
+        }
+
+        if (type != .transfer) {
+            let entry = Entry(
+                id: UUID(),
+                type: type,
+                date: date,
+                amount: amount,
+                categoryId: category.id,
+                name: trimmedName,
+                accountId: account.id
+            )
+
+            // Persist to Supabase
+            do {
+                try await supabase
+                    .from("entries")
+                    .insert(entry)
+                    .execute()
+                self.errorMessage = nil
+            } catch {
+                self.errorMessage = "Failed to save entry: \(error.localizedDescription)"
+                print("Error pushing into database: \(error)")
+            }
+        }
+    }
 
     var doubleFormatter: NumberFormatter {
         let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.usesGroupingSeparator = true
         return formatter
     }
 }
+

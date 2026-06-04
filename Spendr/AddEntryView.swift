@@ -21,14 +21,14 @@ struct AddEntryView: View {
                 }
                 .buttonStyle(.glass)
                 .padding(.leading, 20)
-                
+
                 Spacer()
-                
+
                 Text("Add New Entry")
                     .font(.headline)
-                
+
                 Spacer()
-                
+
                 Color.clear
                     .frame(width: 44, height: 44)
                     .padding(.trailing, 20)
@@ -36,11 +36,11 @@ struct AddEntryView: View {
             .frame(height: 44)
             .padding(.vertical, 0)
             .contentShape(Rectangle())
-            
+
             // Entry type selector
             Picker("Entry Type", selection: $viewModel.type) {
                 ForEach(EntryType.allCases, id: \.self) { entryType in
-                    Text(entryType.rawValue)
+                    Text(entryType.displayName)
                 }
             }
             .pickerStyle(.segmented)
@@ -55,10 +55,14 @@ struct AddEntryView: View {
                     HStack {
                         Text("Amount")
                         Spacer()
-                        TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
-                            .frame(maxWidth: 250)
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
+                        HStack {
+                            Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
+                                .foregroundStyle(.blue)
+                            TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
+                                .textFieldStyle(.roundedBorder)
+                                .multilineTextAlignment(.trailing)
+                        }
+                        .frame(maxWidth: 250)
                     }
 
                     HStack {
@@ -101,25 +105,25 @@ struct AddEntryView: View {
                 .padding(20)
                 .background(Color.base)
             }
-            
+
             // --- 4. ACTION ACTION BUTTON ---
-            Button(action: addEntry) {
+            Button {
+                Task {
+                    await viewModel.addEntry()
+                    dismiss()
+                }
+            } label: {
                 Label("Add Entry", systemImage: "plus")
-                    .frame(maxWidth: 300)
             }
             .padding(.vertical, 15)
             .buttonStyle(.glassProminent)
             .controlSize(.large)
         }
         .frame(maxHeight: .infinity, alignment: .top)
-        .task {
+        .task(id: viewModel.type) {
             await viewModel.fetchAccounts()
             await viewModel.fetchCategories()
         }
-    }
-
-    private func addEntry() {
-        // Your logic to commit data to Supabase
     }
 }
 
@@ -127,3 +131,4 @@ struct AddEntryView: View {
     let mock = AddEntryViewModel()
     AddEntryView(viewModel: mock)
 }
+
