@@ -47,69 +47,132 @@ struct AddEntryView: View {
             .padding(.horizontal)
             .padding(.vertical, 15)
 
-            // Form container
-            ScrollView {
-                VStack(spacing: 30) {
-                    DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
+            if (viewModel.type != .transfer) {
+                ScrollView {
+                    VStack(spacing: 30) {
+                        DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
 
-                    HStack {
-                        Text("Amount")
-                        Spacer()
                         HStack {
-                            Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
-                                .foregroundStyle(.blue)
-                            TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
+                            Text("Amount")
+                            Spacer()
+                            HStack {
+                                Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
+                                    .foregroundStyle(.blue)
+                                TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
+                                    .textFieldStyle(.roundedBorder)
+                                    .multilineTextAlignment(.trailing)
+                            }
+                            .frame(maxWidth: 250)
+                        }
+
+                        HStack {
+                            Text("Account")
+                            Spacer()
+                            Picker("Account", selection: $viewModel.selectedAccount) {
+                                Text("Select an account").tag(nil as Account?)
+                                ForEach(viewModel.accounts) { account in
+                                    Text(account.name)
+                                        .tag(account as Account?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .buttonStyle(.bordered)
+                        }
+
+                        HStack {
+                            Text("Category")
+                            Spacer()
+                            Picker("Category", selection: $viewModel.selectedCategory) {
+                                Text("Select a category").tag(nil as Category?)
+                                ForEach(viewModel.categories) { category in
+                                    Text(category.name)
+                                        .tag(category as Category?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .buttonStyle(.bordered)
+                        }
+
+                        HStack {
+                            Text("Name")
+                            Spacer()
+                            TextField("", text: $viewModel.name)
+                                .frame(maxWidth: 250)
                                 .textFieldStyle(.roundedBorder)
                                 .multilineTextAlignment(.trailing)
                         }
-                        .frame(maxWidth: 250)
                     }
-
-                    HStack {
-                        Text("Account")
-                        Spacer()
-                        Picker("Account", selection: $viewModel.selectedAccount) {
-                            Text("Select an account").tag(nil as Account?)
-                            ForEach(viewModel.accounts) { account in
-                                Text(account.name)
-                                    .tag(account as Account?)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .buttonStyle(.bordered)
-                    }
-
-                    HStack {
-                        Text("Category")
-                        Spacer()
-                        Picker("Category", selection: $viewModel.selectedCategory) {
-                            Text("Select a category").tag(nil as Category?)
-                            ForEach(viewModel.categories) { category in
-                                Text(category.name)
-                                    .tag(category as Category?)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .buttonStyle(.bordered)
-                    }
-
-                    HStack {
-                        Text("Name")
-                        Spacer()
-                        TextField("", text: $viewModel.name)
-                            .frame(maxWidth: 250)
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
-                    }
+                    .padding(20)
+                    .background(Color.base)
                 }
-                .padding(20)
-                .background(Color.base)
-            }
+            } else {
+                ScrollView {
+                    VStack(spacing: 30) {
+                        DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
 
-            // --- 4. ACTION ACTION BUTTON ---
+                        HStack {
+                            Text("Amount")
+                            Spacer()
+                            HStack {
+                                Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
+                                    .foregroundStyle(.blue)
+                                TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
+                                    .textFieldStyle(.roundedBorder)
+                                    .multilineTextAlignment(.trailing)
+                            }
+                            .frame(maxWidth: 250)
+                        }
+
+                        HStack {
+                            Text("From Account")
+                            Spacer()
+                            Picker("Account", selection: $viewModel.selectedAccount) {
+                                Text("Select an account").tag(nil as Account?)
+                                ForEach(viewModel.accounts) { account in
+                                    Text(account.name)
+                                        .tag(account as Account?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .buttonStyle(.bordered)
+                        }
+
+                        HStack {
+                            Text("To Account")
+                            Spacer()
+                            Picker("Account", selection: $viewModel.toAccount) {
+                                Text("Select an account").tag(nil as Account?)
+                                ForEach(viewModel.accounts) { account in
+                                    Text(account.name)
+                                        .tag(account as Account?)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .buttonStyle(.bordered)
+                        }
+
+                        HStack {
+                            Text("Name")
+                            Spacer()
+                            TextField("", text: $viewModel.name)
+                                .frame(maxWidth: 250)
+                                .textFieldStyle(.roundedBorder)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                    .padding(20)
+                    .background(Color.base)
+                }
+            }
+            // Form container
             Button {
                 Task {
-                    await viewModel.addEntry()
+                    if (viewModel.type == .transfer) {
+                        await viewModel.addTransfer()
+                    } else {
+                        await viewModel.addEntry()
+                    }
+                    viewModel.reset()
                     dismiss()
                 }
             } label: {
