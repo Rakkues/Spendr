@@ -16,6 +16,7 @@ struct LoginView: View {
     @State private var email = ""
     /// Local input state for the password field.
     @State private var password = ""
+    @State private var errorMessage: String? = nil
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
@@ -31,10 +32,25 @@ struct LoginView: View {
                 SecureField("Password", text: $password)
                     .textFieldStyle(.roundedBorder)
                 
+                if let errorMessage {
+                Text(errorMessage)
+                    .foregroundStyle(.red)
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                
                 // Trigger sign-in using the provided credentials.
                 Button {
                     Task {
+                        guard !email.isEmpty, !password.isEmpty else {
+                            errorMessage = "Email and password are required."
+                            return
+                        }
+                        errorMessage = nil
                         await authViewModel.signIn(email: email, password: password)
+                        if !authViewModel.errorMessage.isEmpty {
+                            errorMessage = authViewModel.errorMessage
+                        }
                     }
                 } label: {
                     Text("Sign In")

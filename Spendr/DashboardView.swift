@@ -34,18 +34,7 @@ extension Color {
     }
 }
 
-struct CategorySlice: Identifiable {
-    let id = UUID()
-    let name: String
-    let amount: Double
-    let color: Color
-}
 
-private let sampleSlices: [CategorySlice] = [
-    .init(name: "Food", amount: 120, color: .flamingo),
-    .init(name: "Transport", amount: 60, color: .maroon),
-    .init(name: "Bills", amount: 90, color: .mauve)
-]
 
 struct DayEntries {
     let entries: [Entry]
@@ -54,25 +43,28 @@ struct DayEntries {
 
 struct DashboardView: View {
     @State private var isExpanded = false
+    @StateObject var viewModel = DashboardViewModel()
 
-    let food = Category(id: UUID(), name: "Food", userId: UUID(), iconName: "fork.knife", colorHex: "#FF9500", entryType: .expense)
-    let transport = Category(id: UUID(), name: "Transport", userId: UUID(), iconName: "tram.fill", colorHex: "#0A84FF", entryType: .expense)
-    let bills = Category(id: UUID(), name: "Bills", userId: UUID(), iconName: "bolt.fill", colorHex: "#34C759", entryType: .expense)
-    let salary = Category(id: UUID(), name: "Salary", userId: UUID(), iconName: "creditcard.fill", colorHex: "#AF52DE", entryType: .expense)
+    private var monthOptions: [Date] {
+        let calendar = Calendar.current
+        // Force the baseline to be the clean start of the current month
+        let startOfThisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: Date()))!
 
-    private var sampleEntries: [Entry] {
-        [
-            Entry(id: UUID(), type: .expense, date: Date(), amount: 15.0, categoryId: food.id, name: "Dinner", accountId: UUID()),
-            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-3600), amount: 8.5, categoryId: transport.id, name: "Bus", accountId: UUID()),
-            Entry(id: UUID(), type: .expense, date: Date().addingTimeInterval(-7200), amount: 45.0, categoryId: bills.id, name: "Electricity", accountId: UUID()),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-10800), amount: 200.0, categoryId: salary.id, name: "Freelance", accountId: UUID()),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-30000), amount: 500.0, categoryId: salary.id, name: "Freelance", accountId: UUID()),
-            Entry(id: UUID(), type: .income, date: Date().addingTimeInterval(-100000), amount: 500.0, categoryId: salary.id, name: "Freelance", accountId: UUID())
-        ]
+        return (0 ..< 12).compactMap { offset in
+            let rawMonth = calendar.date(byAdding: .month, value: -offset, to: startOfThisMonth)!
+            // Ensure even the offset months are strictly stripped of random hours/minutes
+            return calendar.date(from: calendar.dateComponents([.year, .month], from: rawMonth))
+        }
+    }
+
+    private var monthFormatter: DateFormatter {
+        let df = DateFormatter()
+        df.dateFormat = "MMMM yyyy"
+        return df
     }
 
     private var groupedEntries: [DateComponents: DayEntries] {
-        let grouped = Dictionary(grouping: sampleEntries) { entry in
+        let grouped = Dictionary(grouping: viewModel.entries) { entry in
             Calendar.current.dateComponents([.day, .year, .month], from: entry.date)
         }
         return grouped.mapValues { entries in
@@ -98,20 +90,29 @@ struct DashboardView: View {
                 if !isExpanded {
                     // Pie chart
                     ZStack {
-                        RoundedRectangle(cornerRadius: 16)
+                        ConcentricRectangle(
+                            topLeadingCorner: .concentric(minimum: 16),
+                            topTrailingCorner: .concentric(minimum: 16)
+                        )
                             .fill(Color.crust)
                             .overlay(
                                 VStack(spacing: 8) {
                                     Text("Spending Distribution")
                                         .font(.headline)
-                                    Chart(sampleSlices) { slice in
-                                        SectorMark(
-                                            angle: .value("Amount", slice.amount),
-                                            innerRadius: .ratio(0.6)
-                                        )
-                                        .foregroundStyle(slice.color)
+                                    if viewModel.categorySlices.isEmpty {
+                                        Spacer()
+                                        Text("There is no data to be displayed for this month.")
+                                        Spacer()
+                                    } else {
+                                        Chart(viewModel.categorySlices) { slice in
+                                            SectorMark(
+                                                angle: .value("Amount", slice.amount),
+                                                innerRadius: .ratio(0.6)
+                                            )
+                                            .foregroundStyle(slice.color)
+                                        }
+                                        .frame(height: 180)
                                     }
-                                    .frame(height: 180)
                                 }
                                 .padding()
                             )
@@ -135,20 +136,34 @@ struct DashboardView: View {
                 }
 
                 // Date entries
-                List {
-                    ForEach(groupedEntries.sorted(by: { lhs, rhs in
-                        let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
-                        let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
-                        return lhsDate > rhsDate
-                    }), id: \.key) { dateComponents, dayEntries in
-                        DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense)
+                if viewModel.entries.isEmpty {
+                    VStack {
+                        Image("NoTransactions")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                        Text("No entry data available.")
                     }
+                    .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.base)
                     .listRowInsets(EdgeInsets())
+                } else {
+                    List {
+                        ForEach(groupedEntries.sorted(by: { lhs, rhs in
+                            let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
+                            let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
+                            return lhsDate > rhsDate
+                        }), id: \.key) { dateComponents, dayEntries in
+                            DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense, viewModel: viewModel)
+                        }
+                        .listRowInsets(EdgeInsets())
+                    }
+                    .listStyle(.plain)
+                    .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
                 }
-                .listStyle(.plain)
-                .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.6)
-                .frame(maxWidth: .infinity)
-                .contentShape(Rectangle())
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
@@ -156,6 +171,37 @@ struct DashboardView: View {
         .ignoresSafeArea(edges: .bottom)
         .background(Color.base)
         .foregroundColor(.text)
+        .overlay(alignment: .top) {
+            HStack {
+                Spacer()
+                Picker("Month", selection: $viewModel.selectedMonth) {
+                    ForEach(monthOptions, id: \.self) { month in
+                        Text(monthFormatter.string(from: month)).tag(month)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
+                .shadow(radius: 1)
+                Spacer()
+            }
+            .padding(.top, 3)
+        }
+        .onChange(of: viewModel.selectedMonth) {
+            Task { await viewModel.setMonth(viewModel.selectedMonth) }
+        }
+        .task {
+            await viewModel.fetchEntriesForSelectedMonth()
+            await viewModel.fetchAccounts()
+            await viewModel.fetchCategories()
+        }
+        .onAppear {
+            let cal = Calendar.current
+            if let start = cal.date(from: cal.dateComponents([.year, .month], from: viewModel.selectedMonth)) {
+                viewModel.selectedMonth = start
+            }
+        }
     }
 }
 
@@ -220,6 +266,7 @@ struct EntryRow: View {
 struct DateEntries: View {
     let entry: (key: DateComponents, value: [Entry])
     let netExpense: Double
+    let viewModel: DashboardViewModel
 
     private func formattedDate(from components: DateComponents) -> String {
         guard let date = Calendar.current.date(from: components) else { return "Unknown Date" }
@@ -234,10 +281,22 @@ struct DateEntries: View {
                 date: formattedDate(from: entry.key),
                 amount: netExpense
             )
-//            ForEach(entry.value.indices, id: \.self) { idx in
-//                let e = entry.value[idx]
-//                EntryRow(description: e.name, account: e.account, amount: Double(e.amount), type: e.type, category: e.category)
-//            }
+            ForEach(entry.value) { e in
+                // 1. Compute the sub-expressions first
+                let matchedAccountName = (viewModel.accounts.first(where: { $0.id == e.accountId })?.name) ?? "Account"
+
+                let defaultCategory = Category(id: UUID(), name: "Uncategorized", userId: UUID(), iconName: "questionmark", colorHex: "#CCCCCC", entryType: e.type)
+                let matchedCategory = viewModel.categories.first(where: { $0.id == e.categoryId }) ?? defaultCategory
+
+                // 2. Pass those clean variables into the view
+                EntryRow(
+                    description: e.name,
+                    account: matchedAccountName,
+                    amount: e.amount,
+                    type: e.type,
+                    category: matchedCategory
+                )
+            }
         }
         .padding(.bottom, 5)
     }

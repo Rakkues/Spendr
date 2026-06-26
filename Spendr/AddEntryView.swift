@@ -11,6 +11,12 @@ struct AddEntryView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: AddEntryViewModel
 
+    @State private var showAccountError = false
+    @State private var showCategoryError = false
+    @State private var showToAccountError = false
+    @State private var showAmountError = false
+    @State private var showNameError = false
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -49,7 +55,7 @@ struct AddEntryView: View {
 
             if (viewModel.type != .transfer) {
                 ScrollView {
-                    VStack(spacing: 30) {
+                    VStack(spacing: 20) {
                         DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
 
                         HStack {
@@ -63,6 +69,13 @@ struct AddEntryView: View {
                                     .multilineTextAlignment(.trailing)
                             }
                             .frame(maxWidth: 250)
+                        }
+                        if showAmountError {
+                            Text("Amount must be greater than zero.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
                         }
 
                         HStack {
@@ -78,6 +91,13 @@ struct AddEntryView: View {
                             .pickerStyle(.menu)
                             .buttonStyle(.bordered)
                         }
+                        if showAccountError {
+                            Text("Please select an account.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
+                        }
 
                         HStack {
                             Text("Category")
@@ -92,6 +112,13 @@ struct AddEntryView: View {
                             .pickerStyle(.menu)
                             .buttonStyle(.bordered)
                         }
+                        if showCategoryError {
+                            Text("Please select a category.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
+                        }
 
                         HStack {
                             Text("Name")
@@ -100,6 +127,13 @@ struct AddEntryView: View {
                                 .frame(maxWidth: 250)
                                 .textFieldStyle(.roundedBorder)
                                 .multilineTextAlignment(.trailing)
+                        }
+                        if showNameError {
+                            Text("Please enter a name.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
                         }
                     }
                     .padding(20)
@@ -122,6 +156,13 @@ struct AddEntryView: View {
                             }
                             .frame(maxWidth: 250)
                         }
+                        if showAmountError {
+                            Text("Amount must be greater than zero.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
+                        }
 
                         HStack {
                             Text("From Account")
@@ -135,6 +176,13 @@ struct AddEntryView: View {
                             }
                             .pickerStyle(.menu)
                             .buttonStyle(.bordered)
+                        }
+                        if showAccountError {
+                            Text("Please select a source account.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
                         }
 
                         HStack {
@@ -150,6 +198,13 @@ struct AddEntryView: View {
                             .pickerStyle(.menu)
                             .buttonStyle(.bordered)
                         }
+                        if showToAccountError {
+                            Text("Please select a destination account.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
+                        }
 
                         HStack {
                             Text("Name")
@@ -159,6 +214,13 @@ struct AddEntryView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .multilineTextAlignment(.trailing)
                         }
+                        if showNameError {
+                            Text("Please enter a name.")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.top, -10)
+                        }
                     }
                     .padding(20)
                     .background(Color.base)
@@ -167,13 +229,53 @@ struct AddEntryView: View {
             // Form container
             Button {
                 Task {
+                    // Reset flags
+                    showAccountError = false
+                    showCategoryError = false
+                    showToAccountError = false
+                    showAmountError = false
+                    showNameError = false
+
+                    // Validate
+                    var hasError = false
+
+                    if viewModel.selectedAccount == nil {
+                        showAccountError = true
+                        hasError = true
+                    }
+
+                    if viewModel.type != .transfer && viewModel.selectedCategory == nil {
+                        showCategoryError = true
+                        hasError = true
+                    }
+
+                    if viewModel.type == .transfer && viewModel.toAccount == nil {
+                        showToAccountError = true
+                        hasError = true
+                    }
+
+                    if viewModel.amount <= 0 {
+                        showAmountError = true
+                        hasError = true
+                    }
+
+                    if viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        showNameError = true
+                        hasError = true
+                    }
+
+                    guard !hasError else { return }
+
                     if (viewModel.type == .transfer) {
                         await viewModel.addTransfer()
                     } else {
                         await viewModel.addEntry()
                     }
-                    viewModel.reset()
-                    dismiss()
+
+                    if viewModel.errorMessage == nil {
+                        viewModel.reset()
+                        dismiss()
+                    }
                 }
             } label: {
                 Label("Add Entry", systemImage: "plus")
@@ -183,6 +285,29 @@ struct AddEntryView: View {
             .controlSize(.large)
         }
         .frame(maxHeight: .infinity, alignment: .top)
+        .onChange(of: viewModel.type) {
+            viewModel.selectedCategory = nil
+            showAccountError = false
+            showCategoryError = false
+            showToAccountError = false
+            showAmountError = false
+            showNameError = false
+        }
+        .onChange(of: viewModel.selectedAccount) {
+            showAccountError = false
+        }
+        .onChange(of: viewModel.selectedCategory) {
+            showCategoryError = false
+        }
+        .onChange(of: viewModel.toAccount) {
+            showToAccountError = false
+        }
+        .onChange(of: viewModel.amount) {
+            showAmountError = false
+        }
+        .onChange(of: viewModel.name) {
+            showNameError = false
+        }
         .task(id: viewModel.type) {
             await viewModel.fetchAccounts()
             await viewModel.fetchCategories()
@@ -194,4 +319,3 @@ struct AddEntryView: View {
     let mock = AddEntryViewModel()
     AddEntryView(viewModel: mock)
 }
-

@@ -19,6 +19,7 @@ class AuthViewModel: ObservableObject {
     @Published var isAuthenticated = false
     /// Prevents duplicate requests while an auth operation is in flight.
     @Published var isLoading = false
+    @Published var errorMessage = ""
     
     func getInitialSession() async {
         // Attempt to restore an existing session on app launch (e.g., from persisted credentials).
@@ -83,6 +84,7 @@ class AuthViewModel: ObservableObject {
         } catch {
             // Reset to a clean unauthenticated state if sign-in fails.
             print("Sign-in failed: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
             self.session = nil
             self.isAuthenticated = false
         }

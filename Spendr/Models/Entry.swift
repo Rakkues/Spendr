@@ -33,6 +33,6 @@ struct Entry: Identifiable, Codable {
         case amount
         case categoryId = "category_id"
         case name
-        case accountId = "account_id" // map to snake_case for JSON
+        case accountId = "account_id"
     }
 }
