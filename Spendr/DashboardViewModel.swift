@@ -150,7 +150,6 @@ class DashboardViewModel: ObservableObject {
             let fetched = try decoder.decode([Entry].self, from: response.data)
             self.entries = fetched
 
-            print(fetched)
             self.errorMessage = nil
         } catch {
             self.errorMessage = error.localizedDescription

@@ -34,8 +34,6 @@ extension Color {
     }
 }
 
-
-
 struct DayEntries {
     let entries: [Entry]
     let netExpense: Double
@@ -94,28 +92,28 @@ struct DashboardView: View {
                             topLeadingCorner: .concentric(minimum: 16),
                             topTrailingCorner: .concentric(minimum: 16)
                         )
-                            .fill(Color.crust)
-                            .overlay(
-                                VStack(spacing: 8) {
-                                    Text("Spending Distribution")
-                                        .font(.headline)
-                                    if viewModel.categorySlices.isEmpty {
-                                        Spacer()
-                                        Text("There is no data to be displayed for this month.")
-                                        Spacer()
-                                    } else {
-                                        Chart(viewModel.categorySlices) { slice in
-                                            SectorMark(
-                                                angle: .value("Amount", slice.amount),
-                                                innerRadius: .ratio(0.6)
-                                            )
-                                            .foregroundStyle(slice.color)
-                                        }
-                                        .frame(height: 180)
+                        .fill(Color.crust)
+                        .overlay(
+                            VStack(spacing: 8) {
+                                Text("Spending Distribution")
+                                    .font(.headline)
+                                if viewModel.categorySlices.isEmpty {
+                                    Spacer()
+                                    Text("There is no data to be displayed for this month.")
+                                    Spacer()
+                                } else {
+                                    Chart(viewModel.categorySlices) { slice in
+                                        SectorMark(
+                                            angle: .value("Amount", slice.amount),
+                                            innerRadius: .ratio(0.6)
+                                        )
+                                        .foregroundStyle(slice.color)
                                     }
+                                    .frame(height: 180)
                                 }
-                                .padding()
-                            )
+                            }
+                            .padding()
+                        )
                     }
                     .frame(height: geometry.size.height * 0.3)
                 }
@@ -136,7 +134,7 @@ struct DashboardView: View {
                 }
 
                 // Date entries
-                if viewModel.entries.isEmpty {
+                if viewModel.entries.isEmpty && !viewModel.isLoading {
                     VStack {
                         Image("NoTransactions")
                             .resizable()
@@ -180,10 +178,10 @@ struct DashboardView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .tint(.primary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(.ultraThinMaterial, in: Capsule())
-                .shadow(radius: 1)
+                .glassEffect()
                 Spacer()
             }
             .padding(.top, 3)
