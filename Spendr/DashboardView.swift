@@ -147,15 +147,17 @@ struct DashboardView: View {
                         .background(Color.base)
                         .listRowInsets(EdgeInsets())
                     } else {
-                        List {
-                            ForEach(groupedEntries.sorted(by: { lhs, rhs in
-                                let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
-                                let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
-                                return lhsDate > rhsDate
-                            }), id: \.key) { dateComponents, dayEntries in
-                                DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense, viewModel: viewModel)
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(groupedEntries.sorted(by: { lhs, rhs in
+                                    let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
+                                    let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
+                                    return lhsDate > rhsDate
+                                }), id: \.key) { dateComponents, dayEntries in
+                                    DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense, viewModel: viewModel)
+                                }
+                                .listRowInsets(EdgeInsets())
                             }
-                            .listRowInsets(EdgeInsets())
                         }
                         .listStyle(.plain)
                         .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
@@ -201,7 +203,8 @@ struct DashboardView: View {
                 }
             }
             .navigationDestination(for: Entry.self) { selectedEntry in
-                
+                let editViewModel = EditEntryViewModel(entry: selectedEntry)
+                EditEntryView(viewModel: editViewModel)
             }
         }
     }
@@ -284,21 +287,24 @@ struct DateEntries: View {
                 amount: netExpense
             )
             ForEach(entry.value) { e in
-                // 1. Compute the sub-expressions first
-                let matchedAccountName = (viewModel.accounts.first(where: { $0.id == e.accountId })?.name) ?? "Account"
+                Group {
+                    // 1. Compute the sub-expressions first
+                    let matchedAccountName = (viewModel.accounts.first(where: { $0.id == e.accountId })?.name) ?? "Account"
 
-                let defaultCategory = Category(id: UUID(), name: "Uncategorized", userId: UUID(), iconName: "questionmark", colorHex: "#CCCCCC", entryType: e.type)
-                let matchedCategory = viewModel.categories.first(where: { $0.id == e.categoryId }) ?? defaultCategory
+                    let defaultCategory = Category(id: UUID(), name: "Uncategorized", userId: UUID(), iconName: "questionmark", colorHex: "#CCCCCC", entryType: e.type)
+                    let matchedCategory = viewModel.categories.first(where: { $0.id == e.categoryId }) ?? defaultCategory
 
-                // 2. Pass those clean variables into the view
-                NavigationLink(value: e) {
-                    EntryRow(
-                        description: e.name,
-                        account: matchedAccountName,
-                        amount: e.amount,
-                        type: e.type,
-                        category: matchedCategory
-                    )
+                    // 2. Pass those clean variables into the view
+                    NavigationLink(value: e) {
+                        EntryRow(
+                            description: e.name,
+                            account: matchedAccountName,
+                            amount: e.amount,
+                            type: e.type,
+                            category: matchedCategory
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

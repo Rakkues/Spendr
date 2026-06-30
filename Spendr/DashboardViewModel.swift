@@ -116,7 +116,7 @@ class DashboardViewModel: ObservableObject {
                 // 2. Filter using the syntax: tableName.columnName
                 .eq("accounts.user_id", value: userId)
                 .in("type", values: ["expense", "income"])
-                .gte("date", value: startISO)
+                .gt("date", value: startISO)
                 .lte("date", value: endISO)
                 .order("date", ascending: false)
                 .execute()

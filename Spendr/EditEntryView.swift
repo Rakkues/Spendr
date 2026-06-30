@@ -103,7 +103,7 @@ struct EditEntryView: View {
                         Spacer()
                         Picker("Category", selection: $viewModel.selectedCategory) {
                             Text("Select a category").tag(nil as Category?)
-                            ForEach(viewModel.categories) { category i
+                            ForEach(viewModel.categories) { category in
                                 Text(category.name)
                                     .tag(category as Category?)
                             }
@@ -140,55 +140,7 @@ struct EditEntryView: View {
             }
             // Form container
             Button {
-                Task {
-                    // Reset flags
-                    showAccountError = false
-                    showCategoryError = false
-                    showToAccountError = false
-                    showAmountError = false
-                    showNameError = false
-
-                    // Validate
-                    var hasError = false
-
-                    if viewModel.selectedAccount == nil {
-                        showAccountError = true
-                        hasError = true
-                    }
-
-                    if viewModel.type != .transfer && viewModel.selectedCategory == nil {
-                        showCategoryError = true
-                        hasError = true
-                    }
-
-                    if viewModel.type == .transfer && viewModel.toAccount == nil {
-                        showToAccountError = true
-                        hasError = true
-                    }
-
-                    if viewModel.amount <= 0 {
-                        showAmountError = true
-                        hasError = true
-                    }
-
-                    if viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        showNameError = true
-                        hasError = true
-                    }
-
-                    guard !hasError else { return }
-
-                    if viewModel.type == .transfer {
-                        await viewModel.addTransfer()
-                    } else {
-                        await viewModel.addEntry()
-                    }
-
-                    if viewModel.errorMessage == nil {
-                        viewModel.reset()
-                        dismiss()
-                    }
-                }
+                Task {}
             } label: {
                 Label("Confirm", systemImage: "plus")
             }
@@ -196,6 +148,7 @@ struct EditEntryView: View {
             .buttonStyle(.glassProminent)
             .controlSize(.large)
         }
+        .navigationBarBackButtonHidden(true)
         .frame(maxHeight: .infinity, alignment: .top)
         .onChange(of: viewModel.type) {
             viewModel.selectedCategory = nil
