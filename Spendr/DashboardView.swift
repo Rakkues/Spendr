@@ -106,11 +106,22 @@ struct DashboardView: View {
                                         Chart(viewModel.categorySlices) { slice in
                                             SectorMark(
                                                 angle: .value("Amount", slice.amount),
-                                                innerRadius: .ratio(0.6)
+                                                innerRadius: .ratio(0.6),
+                                                angularInset: 1.0
                                             )
-                                            .foregroundStyle(slice.color)
+                                            .foregroundStyle(by: .value("Category", slice.name))
+                                            .cornerRadius(5.0)
+                                            .annotation(position: .overlay) {
+                                                Image(systemName: slice.iconName)
+                                                    .foregroundStyle(.text)
+                                            }
                                         }
                                         .frame(height: 180)
+                                        .chartForegroundStyleScale(
+                                            domain: viewModel.categorySlices.map { $0.name },
+                                            range: viewModel.categorySlices.map { $0.color }
+                                        )
+                                        .chartLegend(position: .bottom, alignment: .center, spacing: 20)
                                     }
                                 }
                                 .padding()

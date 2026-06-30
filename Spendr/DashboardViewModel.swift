@@ -23,6 +23,7 @@ class DashboardViewModel: ObservableObject {
         let name: String
         let amount: Double
         let color: Color
+        let iconName: String
     }
 
     var categorySlices: [CategorySlice] {
@@ -47,7 +48,8 @@ class DashboardViewModel: ObservableObject {
             return CategorySlice(
                 name: matchingCategory.name,
                 amount: totalAmount,
-                color: Color(hex: matchingCategory.colorHex)
+                color: Color(hex: matchingCategory.colorHex),
+                iconName: matchingCategory.iconName
             )
         }
 
