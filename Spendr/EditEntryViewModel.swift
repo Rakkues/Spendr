@@ -45,4 +45,13 @@ class EditEntryViewModel: ObservableObject {
             self.errorMessage = error.localizedDescription
         }
     }
+    
+    var doubleFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.usesGroupingSeparator = true
+        return formatter
+    }
 }

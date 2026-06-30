@@ -81,122 +81,127 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            let topInset = geometry.safeAreaInsets.top
+        NavigationStack {
+            GeometryReader { geometry in
+                let topInset = geometry.safeAreaInsets.top
 
-            VStack(spacing: 0) {
-                if !isExpanded {
-                    // Pie chart
-                    ZStack {
-                        ConcentricRectangle(
-                            topLeadingCorner: .concentric(minimum: 16),
-                            topTrailingCorner: .concentric(minimum: 16)
-                        )
-                        .fill(Color.crust)
-                        .overlay(
-                            VStack(spacing: 8) {
-                                Text("Spending Distribution")
-                                    .font(.headline)
-                                if viewModel.categorySlices.isEmpty {
-                                    Spacer()
-                                    Text("There is no data to be displayed for this month.")
-                                    Spacer()
-                                } else {
-                                    Chart(viewModel.categorySlices) { slice in
-                                        SectorMark(
-                                            angle: .value("Amount", slice.amount),
-                                            innerRadius: .ratio(0.6)
-                                        )
-                                        .foregroundStyle(slice.color)
+                VStack(spacing: 0) {
+                    if !isExpanded {
+                        // Pie chart
+                        ZStack {
+                            ConcentricRectangle(
+                                topLeadingCorner: .concentric(minimum: 16),
+                                topTrailingCorner: .concentric(minimum: 16)
+                            )
+                            .fill(Color.crust)
+                            .overlay(
+                                VStack(spacing: 8) {
+                                    Text("Spending Distribution")
+                                        .font(.headline)
+                                    if viewModel.categorySlices.isEmpty {
+                                        Spacer()
+                                        Text("There is no data to be displayed for this month.")
+                                        Spacer()
+                                    } else {
+                                        Chart(viewModel.categorySlices) { slice in
+                                            SectorMark(
+                                                angle: .value("Amount", slice.amount),
+                                                innerRadius: .ratio(0.6)
+                                            )
+                                            .foregroundStyle(slice.color)
+                                        }
+                                        .frame(height: 180)
                                     }
-                                    .frame(height: 180)
                                 }
-                            }
-                            .padding()
-                        )
-                    }
-                    .frame(height: geometry.size.height * 0.3)
-                }
-
-                // Expand list button
-                Button(action: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        isExpanded.toggle()
-                    }
-                }) {
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
-                        .font(.headline)
-                        .padding(8)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.surface1)
-                        .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
-                }
-
-                // Date entries
-                if viewModel.entries.isEmpty && !viewModel.isLoading {
-                    VStack {
-                        Image("NoTransactions")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 100, height: 100)
-                        Text("No entry data available.")
-                    }
-                    .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.base)
-                    .listRowInsets(EdgeInsets())
-                } else {
-                    List {
-                        ForEach(groupedEntries.sorted(by: { lhs, rhs in
-                            let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
-                            let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
-                            return lhsDate > rhsDate
-                        }), id: \.key) { dateComponents, dayEntries in
-                            DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense, viewModel: viewModel)
+                                .padding()
+                            )
                         }
+                        .frame(height: geometry.size.height * 0.3)
+                    }
+
+                    // Expand list button
+                    Button(action: {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            isExpanded.toggle()
+                        }
+                    }) {
+                        Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
+                            .font(.headline)
+                            .padding(8)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.surface1)
+                            .accessibilityLabel(isExpanded ? "Collapse" : "Expand")
+                    }
+
+                    // Date entries
+                    if viewModel.entries.isEmpty && !viewModel.isLoading {
+                        VStack {
+                            Image("NoTransactions")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 100, height: 100)
+                            Text("No entry data available.")
+                        }
+                        .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.base)
                         .listRowInsets(EdgeInsets())
-                    }
-                    .listStyle(.plain)
-                    .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
-                }
-            }
-            .frame(width: geometry.size.width, height: geometry.size.height)
-            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
-        }
-        .ignoresSafeArea(edges: .bottom)
-        .background(Color.base)
-        .foregroundColor(.text)
-        .overlay(alignment: .top) {
-            HStack {
-                Spacer()
-                Picker("Month", selection: $viewModel.selectedMonth) {
-                    ForEach(monthOptions, id: \.self) { month in
-                        Text(monthFormatter.string(from: month)).tag(month)
+                    } else {
+                        List {
+                            ForEach(groupedEntries.sorted(by: { lhs, rhs in
+                                let lhsDate = Calendar.current.date(from: lhs.key) ?? Date.distantPast
+                                let rhsDate = Calendar.current.date(from: rhs.key) ?? Date.distantPast
+                                return lhsDate > rhsDate
+                            }), id: \.key) { dateComponents, dayEntries in
+                                DateEntries(entry: (key: dateComponents, value: dayEntries.entries), netExpense: dayEntries.netExpense, viewModel: viewModel)
+                            }
+                            .listRowInsets(EdgeInsets())
+                        }
+                        .listStyle(.plain)
+                        .frame(height: isExpanded ? geometry.size.height - topInset : geometry.size.height * 0.5)
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
                     }
                 }
-                .pickerStyle(.menu)
-                .tint(.primary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .glassEffect()
-                Spacer()
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
             }
-            .padding(.top, 3)
-        }
-        .onChange(of: viewModel.selectedMonth) {
-            Task { await viewModel.setMonth(viewModel.selectedMonth) }
-        }
-        .task {
-            await viewModel.fetchAccounts()
-            await viewModel.fetchCategories()
-            await viewModel.fetchEntriesForSelectedMonth()
-        }
-        .onAppear {
-            let cal = Calendar.current
-            if let start = cal.date(from: cal.dateComponents([.year, .month], from: viewModel.selectedMonth)) {
-                viewModel.selectedMonth = start
+            .ignoresSafeArea(edges: .bottom)
+            .background(Color.base)
+            .foregroundColor(.text)
+            .overlay(alignment: .top) {
+                HStack {
+                    Spacer()
+                    Picker("Month", selection: $viewModel.selectedMonth) {
+                        ForEach(monthOptions, id: \.self) { month in
+                            Text(monthFormatter.string(from: month)).tag(month)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .glassEffect()
+                    Spacer()
+                }
+                .padding(.top, 3)
+            }
+            .onChange(of: viewModel.selectedMonth) {
+                Task { await viewModel.setMonth(viewModel.selectedMonth) }
+            }
+            .task {
+                await viewModel.fetchAccounts()
+                await viewModel.fetchCategories()
+                await viewModel.fetchEntriesForSelectedMonth()
+            }
+            .onAppear {
+                let cal = Calendar.current
+                if let start = cal.date(from: cal.dateComponents([.year, .month], from: viewModel.selectedMonth)) {
+                    viewModel.selectedMonth = start
+                }
+            }
+            .navigationDestination(for: Entry.self) { selectedEntry in
+                
             }
         }
     }
@@ -286,13 +291,15 @@ struct DateEntries: View {
                 let matchedCategory = viewModel.categories.first(where: { $0.id == e.categoryId }) ?? defaultCategory
 
                 // 2. Pass those clean variables into the view
-                EntryRow(
-                    description: e.name,
-                    account: matchedAccountName,
-                    amount: e.amount,
-                    type: e.type,
-                    category: matchedCategory
-                )
+                NavigationLink(value: e) {
+                    EntryRow(
+                        description: e.name,
+                        account: matchedAccountName,
+                        amount: e.amount,
+                        type: e.type,
+                        category: matchedCategory
+                    )
+                }
             }
         }
         .padding(.bottom, 5)
