@@ -309,8 +309,7 @@ struct AddEntryView: View {
             showNameError = false
         }
         .task(id: viewModel.type) {
-            await viewModel.fetchAccounts()
-            await viewModel.fetchCategories()
+            await viewModel.loadFormData()
         }
     }
 }

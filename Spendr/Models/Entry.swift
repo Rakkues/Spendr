@@ -17,7 +17,7 @@ enum EntryType: String, CaseIterable, Codable {
     }
 }
 
-struct Entry: Identifiable, Codable {
+struct Entry: Identifiable, Codable, Hashable {
     let id: UUID
     let type: EntryType
     let date: Date

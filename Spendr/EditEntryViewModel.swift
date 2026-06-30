@@ -11,12 +11,11 @@ import Supabase
 
 @MainActor
 class EditEntryViewModel: ObservableObject {
-    @Published var date = Date()
-    @Published var name = ""
     @Published var type: EntryType = .expense
-    @Published var entryName = ""
+    @Published var date = Date()
     @Published var amount = 0.0
-    
+    @Published var name = ""
+
     @Published var categories: [Category] = []
     @Published var selectedCategory: Category?
     
@@ -25,4 +24,25 @@ class EditEntryViewModel: ObservableObject {
     @Published var toAccount: Account?
     
     @Published var errorMessage: String?
+    
+    private let databaseService = SupabaseDatabaseService()
+    
+    init(entry: Entry) {
+        self.type = entry.type
+        self.date = entry.date
+        self.amount = entry.amount
+        self.name = entry.name
+    }
+    
+    func loadFormData() async {
+        do {
+            async let fetchedCategories = self.databaseService.fetchCategories(for: self.type.rawValue)
+            async let fetchedAccounts = self.databaseService.fetchAccounts()
+                
+            self.categories = try await fetchedCategories
+            self.accounts = try await fetchedAccounts
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
+    }
 }

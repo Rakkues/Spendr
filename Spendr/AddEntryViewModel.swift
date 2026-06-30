@@ -14,7 +14,6 @@ class AddEntryViewModel: ObservableObject {
     @Published var date = Date()
     @Published var name = ""
     @Published var type: EntryType = .expense
-    @Published var entryName = ""
     @Published var amount = 0.0
     
     @Published var categories: [Category] = []
@@ -26,60 +25,19 @@ class AddEntryViewModel: ObservableObject {
     
     @Published var errorMessage: String?
     
-    func fetchCategories() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            return
-        }
-        
-        let userId = user.id.uuidString.lowercased()
-        
-        do {
-            // 1. Fetch the raw response data
-            let response = try await supabase
-                .from("categories")
-                .select("*")
-                .eq("user_id", value: userId)
-                .eq("entry_type", value: self.type.rawValue)
-                .execute()
-                        
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        
-            let fetchedCategories = try decoder.decode([Category].self, from: response.data)
-                        
-            self.categories = fetchedCategories
-        } catch {
-            self.errorMessage = error.localizedDescription
-            print("Error fetching categories: \(error)")
-        }
-    }
+    private let databaseService = SupabaseDatabaseService()
     
-    func fetchAccounts() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            return
-        }
-        
-        let userId = user.id.uuidString.lowercased()
-        
+    func loadFormData() async {
         do {
-            // 1. Fetch the raw response data
-            let response = try await supabase
-                .from("accounts")
-                .select("*")
-                .eq("user_id", value: userId)
-                .execute()
-                        
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        
-            let fetchedAccounts = try decoder.decode([Account].self, from: response.data)
-                        
-            self.accounts = fetchedAccounts
+            // Concurrent fetching makes this super fast!
+            async let fetchedCategories = self.databaseService.fetchCategories(for: self.type.rawValue)
+            async let fetchedAccounts = self.databaseService.fetchAccounts()
+                
+            self.categories = try await fetchedCategories
+            self.accounts = try await fetchedAccounts
         } catch {
             self.errorMessage = error.localizedDescription
-            print("Error fetching categories: \(error)")
+            print("Error loading form data: \(error)")
         }
     }
     
@@ -220,7 +178,6 @@ class AddEntryViewModel: ObservableObject {
         self.date = Date()
         self.name = ""
         self.type = .expense
-        self.entryName = ""
         self.amount = 0.0
 
         // Clear Picker selections to avoid invalid tags

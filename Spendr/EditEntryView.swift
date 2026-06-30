@@ -30,7 +30,7 @@ struct EditEntryView: View {
 
                 Spacer()
 
-                Text("Add New Entry")
+                Text("Edit Entry")
                     .font(.headline)
 
                 Spacer()
@@ -309,13 +309,12 @@ struct EditEntryView: View {
             showNameError = false
         }
         .task(id: viewModel.type) {
-            await viewModel.fetchAccounts()
-            await viewModel.fetchCategories()
+            await viewModel.loadFormData()
         }
     }
 }
 
 #Preview {
-    let mock = EditEntryViewModel()
-    EditEntryView(viewModel: mock)
+//    let mock = EditEntryViewModel()
+//    EditEntryView(viewModel: mock)
 }
