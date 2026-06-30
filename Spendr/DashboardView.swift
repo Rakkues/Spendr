@@ -123,7 +123,6 @@ struct DashboardView: View {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         isExpanded.toggle()
                     }
-                    print(groupedEntries)
                 }) {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
                         .font(.headline)
@@ -190,9 +189,9 @@ struct DashboardView: View {
             Task { await viewModel.setMonth(viewModel.selectedMonth) }
         }
         .task {
-            await viewModel.fetchEntriesForSelectedMonth()
             await viewModel.fetchAccounts()
             await viewModel.fetchCategories()
+            await viewModel.fetchEntriesForSelectedMonth()
         }
         .onAppear {
             let cal = Calendar.current

@@ -21,9 +21,23 @@
 		9492D1332F8F593A00DF3CB0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		94A4A3972FF3982500474FE5 /* Exceptions for "Spendr" folder in "Spendr" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				EditEntryView.swift,
+				EditEntryViewModel.swift,
+			);
+			target = 9492D0A82F868E4F00DF3CB0 /* Spendr */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9492D0AB2F868E4F00DF3CB0 /* Spendr */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94A4A3972FF3982500474FE5 /* Exceptions for "Spendr" folder in "Spendr" target */,
+			);
 			path = Spendr;
 			sourceTree = "<group>";
 		};

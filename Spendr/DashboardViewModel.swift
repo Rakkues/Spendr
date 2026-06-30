@@ -103,7 +103,7 @@ class DashboardViewModel: ObservableObject {
 
         // Format dates as ISO8601 (date-only or full). Assuming your `entries.date` is stored as timestamp/date in Supabase.
         let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withInternetDateTime]
+        isoFormatter.formatOptions = [.withFullDate]
         let startISO = isoFormatter.string(from: interval.start)
         let endISO = isoFormatter.string(from: interval.end)
 
@@ -117,7 +117,7 @@ class DashboardViewModel: ObservableObject {
                 .eq("accounts.user_id", value: userId)
                 .in("type", values: ["expense", "income"])
                 .gte("date", value: startISO)
-                .lt("date", value: endISO)
+                .lte("date", value: endISO)
                 .order("date", ascending: false)
                 .execute()
 
@@ -125,20 +125,17 @@ class DashboardViewModel: ObservableObject {
             decoder.dateDecodingStrategy = .custom { decoder in
                 let container = try decoder.singleValueContainer()
                 let dateStr = try container.decode(String.self)
-
-                // Strategy 1: Try decoding with fractional seconds (e.g., 2026-04-15T08:00:00.123Z)
+                
+                let pureDateFormatter = DateFormatter()
+                pureDateFormatter.dateFormat = "yyyy-MM-dd"
+                if let date = pureDateFormatter.date(from: dateStr) { return date }
+                
                 let fractionalFormatter = ISO8601DateFormatter()
                 fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
                 if let date = fractionalFormatter.date(from: dateStr) { return date }
 
-                // Strategy 2: Try standard ISO8601 (e.g., 2026-04-15T08:00:00Z)
                 let standardFormatter = ISO8601DateFormatter()
                 if let date = standardFormatter.date(from: dateStr) { return date }
-
-                // Strategy 3: Try fallback for pure date format (e.g., 2026-04-15)
-                let pureDateFormatter = DateFormatter()
-                pureDateFormatter.dateFormat = "yyyy-MM-dd"
-                if let date = pureDateFormatter.date(from: dateStr) { return date }
 
                 // If all fail, throw a clean error telling you exactly what string caused the crash
                 throw DecodingError.dataCorruptedError(
