@@ -56,6 +56,7 @@ struct EditEntryView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
+                        .environment(\.timeZone, TimeZone(secondsFromGMT: 0)!)
 
                     HStack {
                         Text("Amount")
@@ -140,7 +141,13 @@ struct EditEntryView: View {
             }
             // Form container
             Button {
-                Task {}
+                Task {
+                    await viewModel.updateEntry()
+
+                    if viewModel.errorMessage == nil {
+                        dismiss()
+                    }
+                }
             } label: {
                 Label("Confirm", systemImage: "plus")
             }
@@ -163,9 +170,6 @@ struct EditEntryView: View {
         }
         .onChange(of: viewModel.selectedCategory) {
             showCategoryError = false
-        }
-        .onChange(of: viewModel.toAccount) {
-            showToAccountError = false
         }
         .onChange(of: viewModel.amount) {
             showAmountError = false

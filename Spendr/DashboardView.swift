@@ -214,8 +214,7 @@ struct DashboardView: View {
                 }
             }
             .navigationDestination(for: Entry.self) { selectedEntry in
-                let editViewModel = EditEntryViewModel(entry: selectedEntry)
-                EditEntryView(viewModel: editViewModel)
+                EditEntryView(viewModel: EditEntryViewModel(entry: selectedEntry))
             }
         }
     }
