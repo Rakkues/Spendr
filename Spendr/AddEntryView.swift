@@ -21,23 +21,10 @@ struct AddEntryView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                }
-                .buttonStyle(.glass)
-                .padding(.leading, 20)
-
                 Spacer()
-
                 Text("Add New Entry")
                     .font(.headline)
-
                 Spacer()
-
-                Color.clear
-                    .frame(width: 44, height: 44)
-                    .padding(.trailing, 20)
             }
             .frame(height: 44)
             .padding(.vertical, 0)
@@ -284,6 +271,7 @@ struct AddEntryView: View {
             .buttonStyle(.glassProminent)
             .controlSize(.large)
         }
+        .background(Color.crust)
         .frame(maxHeight: .infinity, alignment: .top)
         .onChange(of: viewModel.type) {
             viewModel.selectedCategory = nil

@@ -25,47 +25,55 @@ struct ContentView: View {
     var body: some View {
         Group {
             if isLoggedIn {
-                NavigationStack {
-                    ZStack(alignment: .bottom) {
-                        TabView {
-                            Tab("Dashboard", systemImage: "house") {
+                ZStack(alignment: .bottom) {
+                    TabView {
+                        Tab("Dashboard", systemImage: "house") {
+                            NavigationStack {
                                 DashboardView()
                             }
+                        }
 
-                            Tab("Statistics", systemImage: "chart.bar.fill") {
+                        Tab("Statistics", systemImage: "chart.bar.fill") {
+                            NavigationStack {
                                 StatisticsView()
                             }
+                        }
 
-                            Tab("Settings", systemImage: "gear") {
+                        Tab("Settings", systemImage: "gear") {
+                            NavigationStack {
                                 SettingsView()
                             }
                         }
-                        .environmentObject(authViewModel)
-
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                navigateToAddEntry = true // Triggers the overlay sheet
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.title.bold())
-                                    .foregroundColor(.white)
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(Circle())
-                            }
-                            .padding(.trailing, 20)
-                            .buttonStyle(.glassProminent)
-                        }
-                        .padding(.bottom, 60)
                     }
-                    .navigationDestination(isPresented: $navigateToAddEntry) {
+                    .environmentObject(authViewModel)
+
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            navigateToAddEntry = true
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.title.bold())
+                                .foregroundColor(.white)
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                        }
+                        .padding(.trailing, 20)
+                        .buttonStyle(.glassProminent)
+                    }
+                    .padding(.bottom, 60)
+                }
+                .sheet(isPresented: $navigateToAddEntry) {
+                    NavigationStack {
                         AddEntryView(viewModel: addEntryViewModel)
-                            .toolbar(.hidden, for: .navigationBar) // Hides the default apple back button so yours works
                     }
                 }
             } else {
                 LoginView(authViewModel: authViewModel)
             }
+        }
+        .task {
+            await authViewModel.getInitialSession()
         }
     }
 }

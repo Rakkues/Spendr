@@ -19,52 +19,65 @@ struct LoginView: View {
     @State private var errorMessage: String? = nil
     var body: some View {
         NavigationStack {
-            VStack(spacing: 15) {
-                Text("Login")
-                    .dynamicTypeSize(.xxxLarge)
+            ZStack {
+                Color.crust
+                    .ignoresSafeArea()
                 
-                TextField("Email", text: $email)
-                    .textFieldStyle(.roundedBorder)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                
-                // Capture the user's password.
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
-                
-                if let errorMessage {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                
-                // Trigger sign-in using the provided credentials.
-                Button {
-                    Task {
-                        guard !email.isEmpty, !password.isEmpty else {
-                            errorMessage = "Email and password are required."
-                            return
+                VStack(spacing: 15) {
+                    Text("Login")
+                        .dynamicTypeSize(.xxxLarge)
+                    
+                    TextField("Email", text: $email)
+                        .textFieldStyle(.plain)
+                        .padding(10)
+                        .background(Color.surface0)
+                        .cornerRadius(8)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+
+                    // Capture the user's password.
+                    SecureField("Password", text: $password)
+                        .textFieldStyle(.plain)
+                        .padding(10)
+                        .background(Color.surface0)
+                        .cornerRadius(8)
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                            .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    
+                    // Trigger sign-in using the provided credentials.
+                    Button {
+                        Task {
+                            guard !email.isEmpty, !password.isEmpty else {
+                                errorMessage = "Email and password are required."
+                                return
+                            }
+                            errorMessage = nil
+                            await authViewModel.signIn(email: email, password: password)
+                            if !authViewModel.errorMessage.isEmpty {
+                                errorMessage = authViewModel.errorMessage
+                            }
                         }
-                        errorMessage = nil
-                        await authViewModel.signIn(email: email, password: password)
-                        if !authViewModel.errorMessage.isEmpty {
-                            errorMessage = authViewModel.errorMessage
+                    } label: {
+                        Text("Sign In")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glassProminent)
+                    
+                    HStack {
+                        Text("Don't have an account?")
+                        NavigationLink("Sign Up") {
+                            SignUpView(authViewModel: authViewModel)
                         }
                     }
-                } label: {
-                    Text("Sign In")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
-               }
-            .padding(20)
-            HStack {
-                Text("Don't have an account?")
-                NavigationLink("Sign Up") {
-                    SignUpView(authViewModel: authViewModel)
-                }
-             }
+                .padding(20)
+              }
+            .background(Color.crust)
         }
     }
 }

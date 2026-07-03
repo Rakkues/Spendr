@@ -22,16 +22,14 @@ class AuthViewModel: ObservableObject {
     @Published var errorMessage = ""
     
     func getInitialSession() async {
-        // Attempt to restore an existing session on app launch (e.g., from persisted credentials).
-        do {
-            let current = try await supabase.auth.session
+        // Continuous listener stream to capture the session immediately when local storage becomes ready
+        // and catch subsequent state changes (token refreshes, sign outs, etc.)
+        for await authState in supabase.auth.authStateChanges {
+            let current = authState.session
             self.session = current
             self.isAuthenticated = current != nil
-        } catch {
-            // If no session is available, explicitly reset state.
-            print("No active session: \(error.localizedDescription)")
-            self.session = nil
-            self.isAuthenticated = false
+                
+            print("Auth state updated stream: session is \(current == nil ? "nil" : "present"), isAuthenticated: \(self.isAuthenticated)")
         }
     }
     

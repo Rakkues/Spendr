@@ -156,6 +156,20 @@ class DashboardViewModel: ObservableObject {
             print("Error fetching dashboard entries: \(error)")
         }
     }
+    
+    func calculateEntries() -> Double {
+        var netEntries = 0.0
+        
+        for entry in self.entries {
+            if (entry.type == .expense) {
+                netEntries -= entry.amount
+            } else {
+                netEntries += entry.amount
+            }
+        }
+        
+        return netEntries
+    }
 
     func fetchCategories() async {
         guard let user = supabase.auth.currentUser else {

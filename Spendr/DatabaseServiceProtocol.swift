@@ -14,7 +14,7 @@ protocol DatabaseServiceProtocol {
 }
 
 final class SupabaseDatabaseService: DatabaseServiceProtocol {
-    // Helper to get current user ID safely
+    /// Helper to get current user ID safely
     private var currentUserId: String {
         get throws {
             guard let user = supabase.auth.currentUser else {
@@ -24,7 +24,7 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
         }
     }
     
-    // Shared custom snake_case decoder
+    /// Shared custom snake_case decoder
     private var decoder: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -54,5 +54,30 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
         
         return try decoder.decode([Account].self, from: response.data)
+    }
+
+    func fetchEntries() async throws -> [Entry] {
+        let userId = try currentUserId
+        
+        let response = try await supabase
+            .from("entries")
+            .select("*, accounts!inner(id, user_id)")
+            .eq("accounts.user_id", value: userId)
+            .in("type", values: ["expense", "income"])
+            .execute()
+        
+        return try decoder.decode([Entry].self, from: response.data)
+    }
+    
+    func fetchBudgets() async throws -> [Budget] {
+        let userId = try currentUserId
+        
+        let response = try await supabase
+            .from("accounts")
+            .select("*")
+            .eq("user_id", value: userId)
+            .execute()
+        
+        return try decoder.decode([Budget].self, from: response.data)
     }
 }

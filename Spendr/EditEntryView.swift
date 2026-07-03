@@ -21,23 +21,10 @@ struct EditEntryView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                }
-                .buttonStyle(.glass)
-                .padding(.leading, 20)
-
                 Spacer()
-
                 Text("Edit Entry")
                     .font(.headline)
-
                 Spacer()
-
-                Color.clear
-                    .frame(width: 44, height: 44)
-                    .padding(.trailing, 20)
             }
             .frame(height: 44)
             .padding(.vertical, 0)
@@ -155,7 +142,7 @@ struct EditEntryView: View {
             .buttonStyle(.glassProminent)
             .controlSize(.large)
         }
-        .navigationBarBackButtonHidden(true)
+        .background(Color.crust)
         .frame(maxHeight: .infinity, alignment: .top)
         .onChange(of: viewModel.type) {
             viewModel.selectedCategory = nil

@@ -18,49 +18,63 @@ struct SignUpView: View { // Reference to the shared auth view model for perform
     @State private var errorMessage: String? = nil
 
     var body: some View {
-        Text("Sign Up for an Account")
-        VStack {
-            TextField("Email", text: $email)
-                .textFieldStyle(.roundedBorder)
-                .textInputAutocapitalization(.never)
-                .keyboardType(.emailAddress)
+        ZStack {
+            Color.crust
+                .ignoresSafeArea()
+            VStack (spacing: 15){
+                Text("Sign Up for an Account")
+                
+                TextField("Email", text: $email)
+                    .textFieldStyle(.plain)
+                    .padding(10)
+                    .background(Color.surface0)
+                    .cornerRadius(8)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.emailAddress)
+                
+                SecureField("Password", text: $password)
+                    .id("passwordField")
+                    .textFieldStyle(.plain)
+                    .padding(10)
+                    .background(Color.surface0)
+                    .cornerRadius(8)
 
-            SecureField("Password", text: $password)
-                .id("passwordField")
-                .textFieldStyle(.roundedBorder)
+                SecureField("Confirm Password", text: $confirmPassword)
+                    .id("confirmPasswordField")
+                    .textFieldStyle(.plain)
+                    .padding(10)
+                    .background(Color.surface0)
+                    .cornerRadius(8)
 
-            SecureField("Confirm Password", text: $confirmPassword)
-                .id("confirmPasswordField")
-                .textFieldStyle(.roundedBorder)
-
-            if let errorMessage {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            Button {
-                Task {
-                    // Basic validation before attempting sign up
-                    guard !email.isEmpty, !password.isEmpty else {
-                        errorMessage = "Email and password are required."
-                        return
-                    }
-                    guard password == confirmPassword else {
-                        errorMessage = "Passwords do not match."
-                        return
-                    }
-                    errorMessage = nil
-                    await authViewModel.signUp(email: email, password: password)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundStyle(.red)
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } label: {
-                Text("Sign Up")
-                    .frame(maxWidth: .infinity)
+                
+                Button {
+                    Task {
+                        // Basic validation before attempting sign up
+                        guard !email.isEmpty, !password.isEmpty else {
+                            errorMessage = "Email and password are required."
+                            return
+                        }
+                        guard password == confirmPassword else {
+                            errorMessage = "Passwords do not match."
+                            return
+                        }
+                        errorMessage = nil
+                        await authViewModel.signUp(email: email, password: password)
+                    }
+                } label: {
+                    Text("Sign Up")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
             }
-            .buttonStyle(.glassProminent)
+            .padding(20)
         }
-        .padding(20)
     }
 }
 

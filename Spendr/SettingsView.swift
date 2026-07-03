@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    
+
     var body: some View {
         Button {
             Task {
@@ -21,7 +21,8 @@ struct SettingsView: View {
         }
         .buttonStyle(.glass)
         .foregroundStyle(Color.red)
-       }
+        .navigationTitle("Settings")
+    }
 }
 
 #Preview {
