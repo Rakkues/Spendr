@@ -17,6 +17,8 @@ class DashboardViewModel: ObservableObject {
     @Published var accounts: [Account] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    
+    private let databaseService = SupabaseDatabaseService()
 
     struct CategorySlice: Identifiable {
         let id = UUID()
@@ -83,6 +85,12 @@ class DashboardViewModel: ObservableObject {
 
     func setMonth(_ date: Date) async {
         self.selectedMonth = date
+        await self.fetchEntriesForSelectedMonth()
+    }
+    
+    func refreshDashboard() async {
+        await self.fetchAccounts()
+        await self.fetchCategories()
         await self.fetchEntriesForSelectedMonth()
     }
 

@@ -181,13 +181,17 @@ struct DashboardView: View {
         .ignoresSafeArea(edges: .bottom)
         .background(Color.crust)
         .foregroundColor(.text)
+        .task {
+            await viewModel.refreshDashboard()
+        }
         .onChange(of: viewModel.selectedMonth) {
             Task { await viewModel.setMonth(viewModel.selectedMonth) }
         }
-        .task {
-            await viewModel.fetchAccounts()
-            await viewModel.fetchCategories()
-            await viewModel.fetchEntriesForSelectedMonth()
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewEntrySaved"))) { _ in
+            Task {
+                print("Observed new entry insertion! Refreshing chart dataset...")
+                await viewModel.refreshDashboard()
+            }
         }
         .onAppear {
             let cal = Calendar.current

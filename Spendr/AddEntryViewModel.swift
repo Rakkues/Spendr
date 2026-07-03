@@ -77,6 +77,7 @@ class AddEntryViewModel: ObservableObject {
                 .from("entries")
                 .insert(entry)
                 .execute()
+            NotificationCenter.default.post(name: NSNotification.Name("NewEntrySaved"), object: nil)
             self.errorMessage = nil
         } catch {
             self.errorMessage = "Failed to save entry: \(error.localizedDescription)"

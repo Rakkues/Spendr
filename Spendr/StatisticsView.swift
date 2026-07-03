@@ -23,30 +23,35 @@ struct StatisticsView: View {
                         Picker("Year", selection: $viewModel.selectedYear) {
                             let current = Calendar.current.component(.year, from: Date())
                             // Wrap the range in Array() so the compiler knows exactly how to iterate it
-                            ForEach(Array((current-1)...(current + 1)), id: \.self) { year in
+                            ForEach(Array((current - 1)...(current + 1)), id: \.self) { year in
                                 Text(String(year)).tag(year)
                             }
                         }
                         .pickerStyle(.segmented)
+                        .onChange(of: viewModel.selectedYear) { oldValue, newValue in
+                            print("Picker changed from \(oldValue) to \(newValue)")
+                            Task { await viewModel.loadMonthlyNet() }
+                        }
                     }
 
                     if viewModel.hasMonthlyNetData {
                         Chart(viewModel.monthlyNet) { point in
-                            // 1. Explicitly initialize the Color type so the builder doesn't guess
+                            // Transform integer month (1-12) into a localized string ("Jan", "Feb", etc.)
+                            let monthName = DateFormatter().shortMonthSymbols[point.month - 1]
                             let markColor: Color = point.value >= 0 ? .green : .red
 
                             LineMark(
-                                x: .value("Month", point.month),
+                                x: .value("Month", monthName), // Use the string name here so it charts categorically
                                 y: .value("Net", point.value)
                             )
-                            .foregroundStyle(markColor) // 2. Clean, lightning-fast compilation pass
+                            .foregroundStyle(markColor)
 
                             BarMark(
-                                x: .value("Month", point.month),
+                                x: .value("Month", monthName),
                                 y: .value("Net", point.value)
                             )
                             .opacity(0.25)
-                            .foregroundStyle(markColor) // Optional: dynamically match bars to line state
+                            .foregroundStyle(markColor)
                         }
                         .frame(height: 220)
                     } else {
@@ -114,22 +119,26 @@ struct StatisticsView: View {
         .background(Color.crust)
         .navigationTitle("Statistics")
         .task { await viewModel.refresh() }
-        // Pass the property directly and update your tasks cleanly
         .onChange(of: viewModel.selectedYear) {
             Task { await viewModel.loadMonthlyNet() }
         }
         .onChange(of: viewModel.selectedMonth) {
             Task { await viewModel.loadBudgetsProgress() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewEntrySaved"))) { _ in
+            Task {
+                await viewModel.refresh()
+            }
+        }
     }
 
     private func monthName(_ month: Int) -> String {
         let df = DateFormatter()
         df.locale = .current
-        return df.monthSymbols[max(0, min(11, month-1))]
+        return df.monthSymbols[max(0, min(11, month - 1))]
     }
 }
 
- #Preview {
+#Preview {
     NavigationStack { StatisticsView() }
- }
+}

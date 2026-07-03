@@ -12,6 +12,8 @@ struct ContentView: View {
     @StateObject private var addEntryViewModel = AddEntryViewModel()
     @State private var navigateToAddEntry = false
 
+    @State private var selectedTab = 0
+
     private var isLoggedIn: Bool {
         let isXCodePreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
 
@@ -26,20 +28,20 @@ struct ContentView: View {
         Group {
             if isLoggedIn {
                 ZStack(alignment: .bottom) {
-                    TabView {
-                        Tab("Dashboard", systemImage: "house") {
+                    TabView(selection: $selectedTab) {
+                        Tab("Dashboard", systemImage: "house", value: 0) {
                             NavigationStack {
                                 DashboardView()
                             }
                         }
 
-                        Tab("Statistics", systemImage: "chart.bar.fill") {
+                        Tab("Statistics", systemImage: "chart.bar.fill", value: 1) {
                             NavigationStack {
                                 StatisticsView()
                             }
                         }
 
-                        Tab("Settings", systemImage: "gear") {
+                        Tab("Settings", systemImage: "gear", value: 2) {
                             NavigationStack {
                                 SettingsView()
                             }
@@ -47,21 +49,24 @@ struct ContentView: View {
                     }
                     .environmentObject(authViewModel)
 
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            navigateToAddEntry = true
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.title.bold())
-                                .foregroundColor(.white)
-                                .frame(width: 50, height: 50)
-                                .clipShape(Circle())
+                    if selectedTab == 0 || selectedTab == 1 {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                navigateToAddEntry = true
+                            }) {
+                                Image(systemName: "plus")
+                                    .font(.title.bold())
+                                    .foregroundColor(.white)
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                            }
+                            .padding(.trailing, 20)
+                            .buttonStyle(.glassProminent)
                         }
-                        .padding(.trailing, 20)
-                        .buttonStyle(.glassProminent)
+                        .padding(.bottom, 60)
+                        .transition(.opacity.combined(with: .scale))
                     }
-                    .padding(.bottom, 60)
                 }
                 .sheet(isPresented: $navigateToAddEntry) {
                     NavigationStack {
