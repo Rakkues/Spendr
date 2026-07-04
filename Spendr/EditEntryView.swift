@@ -17,6 +17,8 @@ struct EditEntryView: View {
     @State private var showAmountError = false
     @State private var showNameError = false
 
+    @State private var showDeleteConfirmation = false
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -52,7 +54,10 @@ struct EditEntryView: View {
                             Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
                                 .foregroundStyle(.blue)
                             TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
-                                .textFieldStyle(.roundedBorder)
+                                .textFieldStyle(.plain)
+                                .padding(10)
+                                .background(Color.surface0)
+                                .cornerRadius(8)
                                 .multilineTextAlignment(.trailing)
                         }
                         .frame(maxWidth: 250)
@@ -112,7 +117,10 @@ struct EditEntryView: View {
                         Spacer()
                         TextField("", text: $viewModel.name)
                             .frame(maxWidth: 250)
-                            .textFieldStyle(.roundedBorder)
+                            .textFieldStyle(.plain)
+                            .padding(10)
+                            .background(Color.surface0)
+                            .cornerRadius(8)
                             .multilineTextAlignment(.trailing)
                     }
                     if showNameError {
@@ -121,6 +129,35 @@ struct EditEntryView: View {
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .padding(.top, -10)
+                    }
+
+                    Button(role: .destructive) {
+                        // 1. Trigger the dialog display instead of deleting immediately
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete Entry", systemImage: "trash")
+                    }
+                    // 2. Attach the dialog presentation logic here
+                    .confirmationDialog(
+                        "Are you sure you want to delete this entry? This action cannot be undone.",
+                        isPresented: $showDeleteConfirmation,
+                        titleVisibility: .visible
+                    ) {
+                        // 3. Define the interactive buttons inside the modal dialog popup
+                        Button("Delete permanently", role: .destructive) {
+                            Task {
+                                await viewModel.deleteEntry()
+
+                                if viewModel.errorMessage == nil {
+                                    dismiss()
+                                }
+                            }
+                        }
+
+                        Button("Cancel", role: .cancel) {
+                            // System automatically handles hiding the dialog,
+                            // but explicit cancellation actions go here.
+                        }
                     }
                 }
                 .padding(20)

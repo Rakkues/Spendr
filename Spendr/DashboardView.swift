@@ -107,10 +107,6 @@ struct DashboardView: View {
                                         )
                                         .foregroundStyle(by: .value("Category", slice.name))
                                         .cornerRadius(5.0)
-                                        .annotation(position: .overlay) {
-                                            Image(systemName: slice.iconName)
-                                                .foregroundStyle(Color.black)
-                                        }
                                     }
                                     .frame(height: 250)
                                     .chartForegroundStyleScale(

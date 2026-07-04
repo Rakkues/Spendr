@@ -99,6 +99,21 @@ class EditEntryViewModel: ObservableObject {
         }
     }
     
+    func deleteEntry() async {
+        do {
+            try await supabase
+                .from("entries")
+                .delete()
+                .eq("id", value: entry.id)
+                .execute()
+                    
+        } catch {
+            print("❌ Supabase Update Failed with Error: \(error)")
+            print("Detailed Description: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
+        }
+    }
+    
     var doubleFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
