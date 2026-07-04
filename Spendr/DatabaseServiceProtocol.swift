@@ -24,10 +24,8 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
         }
     }
     
-    /// Shared custom snake_case decoder
     private var decoder: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
 

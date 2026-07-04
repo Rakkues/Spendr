@@ -196,7 +196,6 @@ class DashboardViewModel: ObservableObject {
                 .execute()
 
             let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
 
             let fetchedCategories = try decoder.decode([Category].self, from: response.data)
 
@@ -224,7 +223,6 @@ class DashboardViewModel: ObservableObject {
                 .execute()
 
             let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
 
             let fetchedAccounts = try decoder.decode([Account].self, from: response.data)
 
