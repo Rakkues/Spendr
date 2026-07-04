@@ -40,7 +40,7 @@ struct AddEntryView: View {
             .padding(.horizontal)
             .padding(.vertical, 15)
 
-            if (viewModel.type != .transfer) {
+            if viewModel.type != .transfer {
                 ScrollView {
                     VStack(spacing: 20) {
                         DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
@@ -52,7 +52,10 @@ struct AddEntryView: View {
                                 Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
                                     .foregroundStyle(.blue)
                                 TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
-                                    .textFieldStyle(.roundedBorder)
+                                    .textFieldStyle(.plain)
+                                    .padding(10)
+                                    .background(Color.surface0)
+                                    .cornerRadius(8)
                                     .multilineTextAlignment(.trailing)
                             }
                             .frame(maxWidth: 250)
@@ -112,7 +115,10 @@ struct AddEntryView: View {
                             Spacer()
                             TextField("", text: $viewModel.name)
                                 .frame(maxWidth: 250)
-                                .textFieldStyle(.roundedBorder)
+                                .textFieldStyle(.plain)
+                                .padding(10)
+                                .background(Color.surface0)
+                                .cornerRadius(8)
                                 .multilineTextAlignment(.trailing)
                         }
                         if showNameError {
@@ -128,7 +134,7 @@ struct AddEntryView: View {
                 }
             } else {
                 ScrollView {
-                    VStack(spacing: 30) {
+                    VStack(spacing: 20) {
                         DatePicker("Date", selection: $viewModel.date, displayedComponents: [.date])
 
                         HStack {
@@ -138,7 +144,10 @@ struct AddEntryView: View {
                                 Text(viewModel.selectedAccount?.currencyCode ?? "Currency")
                                     .foregroundStyle(.blue)
                                 TextField("", value: $viewModel.amount, formatter: viewModel.doubleFormatter)
-                                    .textFieldStyle(.roundedBorder)
+                                    .textFieldStyle(.plain)
+                                    .padding(10)
+                                    .background(Color.surface0)
+                                    .cornerRadius(8)
                                     .multilineTextAlignment(.trailing)
                             }
                             .frame(maxWidth: 250)
@@ -198,7 +207,10 @@ struct AddEntryView: View {
                             Spacer()
                             TextField("", text: $viewModel.name)
                                 .frame(maxWidth: 250)
-                                .textFieldStyle(.roundedBorder)
+                                .textFieldStyle(.plain)
+                                .padding(10)
+                                .background(Color.surface0)
+                                .cornerRadius(8)
                                 .multilineTextAlignment(.trailing)
                         }
                         if showNameError {
@@ -253,7 +265,7 @@ struct AddEntryView: View {
 
                     guard !hasError else { return }
 
-                    if (viewModel.type == .transfer) {
+                    if viewModel.type == .transfer {
                         await viewModel.addTransfer()
                     } else {
                         await viewModel.addEntry()

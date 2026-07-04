@@ -95,10 +95,9 @@ struct DashboardView: View {
                             VStack(spacing: 8) {
                                 Text("Spending Distribution")
                                     .font(.headline)
+                                Spacer()
                                 if viewModel.categorySlices.isEmpty {
-                                    Spacer()
                                     Text("There is no data to be displayed for this month.")
-                                    Spacer()
                                 } else {
                                     Chart(viewModel.categorySlices) { slice in
                                         SectorMark(
@@ -123,6 +122,7 @@ struct DashboardView: View {
                                         NetSpending(netEntries: viewModel.calculateEntries())
                                     }
                                 }
+                                Spacer()
                             }
                             .padding()
                         )
@@ -210,6 +210,7 @@ struct DashboardView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .padding(8)
                 .tint(.primary)
                 .glassEffect()
                 .labelsHidden()
