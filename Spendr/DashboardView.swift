@@ -211,6 +211,14 @@ struct DashboardView: View {
                 .glassEffect()
                 .labelsHidden()
             }
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink {
+                    AddEntryView(viewModel: AddEntryViewModel())
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.body.bold()) // Matches native navbar item sizes
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -48,30 +48,6 @@ struct ContentView: View {
                         }
                     }
                     .environmentObject(authViewModel)
-
-                    if selectedTab == 0 || selectedTab == 1 {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                navigateToAddEntry = true
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.title.bold())
-                                    .foregroundColor(.white)
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(Circle())
-                            }
-                            .padding(.trailing, 20)
-                            .buttonStyle(.glassProminent)
-                        }
-                        .padding(.bottom, 60)
-                        .transition(.opacity.combined(with: .scale))
-                    }
-                }
-                .sheet(isPresented: $navigateToAddEntry) {
-                    NavigationStack {
-                        AddEntryView(viewModel: addEntryViewModel)
-                    }
                 }
             } else {
                 LoginView(authViewModel: authViewModel)

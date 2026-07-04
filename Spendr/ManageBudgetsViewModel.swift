@@ -36,24 +36,23 @@ class ManageBudgetsViewModel: ObservableObject {
             self.errorMessage = error.localizedDescription
         }
     }
+    
+    func setBudget() async {}
 }
 
-// This wrapper exists ONLY for your ManageBudgets screen
 struct CategoryBudgetRow: Decodable, Identifiable {
-    let category: Category // Your original, unmodified model
-    let budget: Budget?    // Your original, unmodified model (Optional)
+    let category: Category
+    let budget: Budget?
 
-    var id: UUID { category.id } // Satisfies Identifiable for SwiftUI Lists
+    var id: UUID { category.id }
 
     enum CodingKeys: String, CodingKey {
         case budgets
     }
 
     init(from decoder: Decoder) throws {
-        // 1. Decode the core Category object fields directly out of the root JSON container
         self.category = try Category(from: decoder)
         
-        // 2. Safely unpack the PostgREST array relation into a single singular property
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let budgetsArray = try container.decodeIfPresent([Budget].self, forKey: .budgets)
         self.budget = budgetsArray?.first

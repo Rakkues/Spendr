@@ -55,6 +55,7 @@ struct ManageBudgetsView: View {
                                 }
                             }
                         }
+                        .listRowBackground(Color.base)
                     }
                     .scrollContentBackground(.hidden)
                 }

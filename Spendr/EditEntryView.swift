@@ -59,6 +59,7 @@ struct EditEntryView: View {
                                 .background(Color.surface0)
                                 .cornerRadius(8)
                                 .multilineTextAlignment(.trailing)
+                                .keyboardType(.decimalPad)
                         }
                         .frame(maxWidth: 250)
                     }
