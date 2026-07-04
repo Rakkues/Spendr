@@ -90,10 +90,10 @@ class EditEntryViewModel: ObservableObject {
                 .eq("id", value: self.entry.id)
                 .execute()
                     
-            print("✅ Safe entry update completed! Status: \(response.status)")
+            print("Safe entry update completed! Status: \(response.status)")
                     
         } catch {
-            print("❌ Supabase Update Failed with Error: \(error)")
+            print("Supabase Update Failed with Error: \(error)")
             print("Detailed Description: \(error.localizedDescription)")
             self.errorMessage = error.localizedDescription
         }

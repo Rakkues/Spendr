@@ -56,6 +56,10 @@ struct LoginView: View {
                                 errorMessage = "Email and password are required."
                                 return
                             }
+                            guard authViewModel.isValidEmail(email) else {
+                                errorMessage = "Please enter a valid email address"
+                                return
+                            }
                             errorMessage = nil
                             await authViewModel.signIn(email: email, password: password)
                             if !authViewModel.errorMessage.isEmpty {

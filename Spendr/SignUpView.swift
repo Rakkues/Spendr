@@ -14,16 +14,16 @@ struct SignUpView: View { // Reference to the shared auth view model for perform
     /// Local input state for the password field.
     @State private var password = ""
     @State private var confirmPassword = ""
-    
+
     @State private var errorMessage: String? = nil
 
     var body: some View {
         ZStack {
             Color.crust
                 .ignoresSafeArea()
-            VStack (spacing: 15){
+            VStack(spacing: 15) {
                 Text("Sign Up for an Account")
-                
+
                 TextField("Email", text: $email)
                     .textFieldStyle(.plain)
                     .padding(10)
@@ -31,7 +31,7 @@ struct SignUpView: View { // Reference to the shared auth view model for perform
                     .cornerRadius(8)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
-                
+
                 SecureField("Password", text: $password)
                     .id("passwordField")
                     .textFieldStyle(.plain)
@@ -52,12 +52,16 @@ struct SignUpView: View { // Reference to the shared auth view model for perform
                         .font(.footnote)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
+
                 Button {
                     Task {
                         // Basic validation before attempting sign up
                         guard !email.isEmpty, !password.isEmpty else {
                             errorMessage = "Email and password are required."
+                            return
+                        }
+                        guard authViewModel.isValidEmail(email) else {
+                            errorMessage = "Please enter a valid email address"
                             return
                         }
                         guard password == confirmPassword else {
