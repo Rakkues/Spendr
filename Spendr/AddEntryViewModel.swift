@@ -73,10 +73,7 @@ class AddEntryViewModel: ObservableObject {
 
         // Persist to Supabase
         do {
-            try await supabase
-                .from("entries")
-                .insert(entry)
-                .execute()
+            try await databaseService.addEntry(entry)
             NotificationCenter.default.post(name: NSNotification.Name("NewEntrySaved"), object: nil)
             self.errorMessage = nil
         } catch {
@@ -108,21 +105,8 @@ class AddEntryViewModel: ObservableObject {
             return
         }
             
-        let userId = user.id.uuidString.lowercased()
-            
         do {
-            let response = try await supabase
-                .from("categories")
-                .select("*")
-                .eq("user_id", value: userId)
-                .eq("entry_type", value: "transfer")
-                .single()
-                .execute()
-                
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-                
-            let transferCategory = try decoder.decode(Category.self, from: response.data)
+            let transferCategory = try await databaseService.fetchTransferCategory()
                 
             let fromEntry = Entry(
                 id: UUID(),
@@ -154,18 +138,8 @@ class AddEntryViewModel: ObservableObject {
                 fromEntryId: fromEntry.id,
                 toEntryId: toEntry.id
             )
-                
-            // Insert entries into db
-            try await supabase
-                .from("entries")
-                .insert([fromEntry, toEntry])
-                .execute()
-                
-            // Insert transfer into db
-            try await supabase
-                .from("transfers")
-                .insert(transfer)
-                .execute()
+            
+            try await databaseService.addTransfer(from: fromEntry, to: toEntry, transfer: transfer)
                 
             self.errorMessage = nil
                 

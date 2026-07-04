@@ -25,57 +25,104 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
     }
     
     private var decoder: JSONDecoder {
-        let decoder = JSONDecoder()
-        return decoder
+        return JSONDecoder()
     }
 
+    /// Fetch functions
     func fetchCategories(for entryType: String) async throws -> [Category] {
         let userId = try currentUserId
         
-        let response = try await supabase
+        let categories: [Category] = try await supabase
             .from("categories")
             .select("*")
             .eq("user_id", value: userId)
             .eq("entry_type", value: entryType)
             .execute()
+            .value
         
-        return try decoder.decode([Category].self, from: response.data)
+        return categories
+    }
+    
+    func fetchTransferCategory() async throws -> Category {
+        let userId = try currentUserId
+        
+        let categories: [Category] = try await supabase
+            .from("categories")
+            .select("*")
+            .eq("user_id", value: userId)
+            .eq("entry_type", value: "transfer")
+            .execute()
+            .value
+        
+        guard let transferCategory = categories.first else {
+            throw NSError(
+                domain: "SupabaseDatabaseService",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Transfer category not found in the database. Please verify that your data is seeded."]
+            )
+        }
+        
+        return transferCategory
     }
 
     func fetchAccounts() async throws -> [Account] {
         let userId = try currentUserId
         
-        let response = try await supabase
+        let accounts: [Account] = try await supabase
             .from("accounts")
             .select("*")
             .eq("user_id", value: userId)
             .execute()
+            .value
         
-        return try decoder.decode([Account].self, from: response.data)
+        return accounts
     }
 
     func fetchEntries() async throws -> [Entry] {
         let userId = try currentUserId
         
-        let response = try await supabase
+        let entries: [Entry] = try await supabase
             .from("entries")
             .select("*, accounts!inner(id, user_id)")
             .eq("accounts.user_id", value: userId)
             .in("type", values: ["expense", "income"])
             .execute()
+            .value
         
-        return try decoder.decode([Entry].self, from: response.data)
+        return entries
     }
     
     func fetchBudgets() async throws -> [Budget] {
         let userId = try currentUserId
         
-        let response = try await supabase
+        let budgets: [Budget] = try await supabase
             .from("accounts")
             .select("*")
             .eq("user_id", value: userId)
             .execute()
+            .value
         
-        return try decoder.decode([Budget].self, from: response.data)
+        return budgets
+    }
+    
+    /// Insert functions
+    func addEntry(_ entry: Entry) async throws {
+        try await supabase
+            .from("entries")
+            .insert(entry)
+            .execute()
+     }
+    
+    func addTransfer(from fromEntry: Entry, to toEntry: Entry, transfer: Transfer) async throws {
+        try await supabase
+            .from("entries")
+            .insert([fromEntry, toEntry])
+            .execute()
+            
+        // Insert transfer into db
+        try await supabase
+            .from("transfers")
+            .insert(transfer)
+            .execute()
     }
 }
