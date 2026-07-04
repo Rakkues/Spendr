@@ -7,10 +7,14 @@
 
 import Foundation
 
-struct Budget: Identifiable, Decodable {
+struct Budget: Identifiable, Codable, Hashable {
     let id: UUID
     let amount: Double
     let categoryId: UUID
-    let month: Int
-    let year: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case amount
+        case categoryId = "category_id"
+    }
 }
