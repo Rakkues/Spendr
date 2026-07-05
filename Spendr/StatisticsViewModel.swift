@@ -13,6 +13,7 @@ struct MonthlyNetPoint: Identifiable {
 final class StatisticsViewModel: ObservableObject {
     @Published var monthlyNet: [MonthlyNetPoint] = []
     @Published var budgets: [Budget] = []
+    @Published var categories: [Category] = []
     @Published var monthlyExpensesByBudget: [UUID: Double] = [:]
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -26,6 +27,12 @@ final class StatisticsViewModel: ObservableObject {
         self.monthlyNet.contains { $0.value != 0 }
     }
     
+    var hasBudgets: Bool {
+        !self.budgets.isEmpty
+    }
+    
+    init() {}
+    
     func refresh() async {
         self.isLoading = true
         self.errorMessage = nil
@@ -37,6 +44,9 @@ final class StatisticsViewModel: ObservableObject {
                 group.addTask { [weak self] in
                     await self?.loadBudgetsProgress()
                 }
+                group.addTask { [weak self] in
+                    await self?.loadCategories()
+                }
                 try await group.waitForAll()
             }
         } catch {
@@ -45,38 +55,18 @@ final class StatisticsViewModel: ObservableObject {
         self.isLoading = false
     }
     
+    func loadCategories() async {
+        do {
+            self.categories = try await databaseService.fetchCategories()
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
+    }
+    
     func loadMonthlyNet() async {
         do {
-            // 1. Fetch raw data bytes from Supabase to bypass default ISO8601 strictness
-            let rawData = try await supabase.from("entries").select().execute().data
+            let entries = try await databaseService.fetchEntries()
             
-            // 2. Configure a custom decoder to parse pure "YYYY-MM-DD" date strings safely
-            let decoder = JSONDecoder()
-            
-            let ymdFormatter = DateFormatter()
-            ymdFormatter.dateFormat = "yyyy-MM-dd"
-            ymdFormatter.calendar = Calendar(identifier: .gregorian)
-            ymdFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-            ymdFormatter.locale = Locale(identifier: "en_US_POSIX")
-            
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let dateString = try container.decode(String.self)
-                
-                if let date = ymdFormatter.date(from: dateString) {
-                    return date
-                }
-                if let date = ISO8601DateFormatter().date(from: dateString) {
-                    return date
-                }
-                throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date format: \(dateString)")
-            }
-            
-            // 3. Perform the decoding explicitly
-            let entries = try decoder.decode([Entry].self, from: rawData)
-            print("Successfully decoded \(entries.count) entries from database!")
-            
-            // 4. Calculate your net charts exactly like before
             let cal = Calendar.current
             let year = self.selectedYear
             var totals = Array(repeating: 0.0, count: 12)
@@ -99,8 +89,6 @@ final class StatisticsViewModel: ObservableObject {
             print("Chart generation completed. monthlyNet points count: \(self.monthlyNet.count)")
             
         } catch {
-            // This is what was swallowing your app's task context!
-            print(" CRITICAL ERROR INSIDE LOADMONTHLYNET: \(error)")
             self.errorMessage = error.localizedDescription
             self.monthlyNet = []
         }
@@ -109,7 +97,6 @@ final class StatisticsViewModel: ObservableObject {
     func loadBudgetsProgress() async {
         do {
             let budgets = try await databaseService.fetchBudgets()
-            print(budgets)
             self.budgets = budgets
             guard !budgets.isEmpty else {
                 self.monthlyExpensesByBudget = [:]

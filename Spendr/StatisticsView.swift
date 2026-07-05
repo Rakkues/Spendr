@@ -88,20 +88,21 @@ struct StatisticsView: View {
                                 // 2. Use that clean non-optional ID to check the dictionary
                                 let spent = viewModel.monthlyExpensesByBudget[categoryId] ?? 0
                                 let progress = max(0, min(1, budget.amount == 0 ? 0 : spent / budget.amount))
+                                let categoryName = viewModel.categories.first(where: { $0.id == categoryId })?.name ?? "Budget"
                                 VStack(alignment: .leading, spacing: 6) {
                                     HStack {
-                                        Text("Budget")
+                                        Text(categoryName)
                                             .font(.subheadline)
                                             .bold()
                                         Spacer()
-                                        Text("$\(spent, specifier: "%.2f") / $\(budget.amount, specifier: "%.2f")")
+                                        Text("RM\(spent, specifier: "%.2f") / RM\(budget.amount, specifier: "%.2f")")
                                             .font(.caption)
                                     }
                                     ProgressView(value: progress)
                                         .tint(progress < 1 ? .accentColor : .red)
                                 }
                                 .padding(12)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                                .background(Color.base, in: RoundedRectangle(cornerRadius: 12))
                             }
                         }
                     } else {
