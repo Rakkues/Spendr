@@ -84,14 +84,7 @@ class EditEntryViewModel: ObservableObject {
                 accountId: account.id
             )
 
-            let response = try await supabase
-                .from("entries")
-                .update(updatedEntry)
-                .eq("id", value: self.entry.id)
-                .execute()
-                    
-            print("Safe entry update completed! Status: \(response.status)")
-                    
+            try await databaseService.updateEntry(updatedEntry)
         } catch {
             print("Supabase Update Failed with Error: \(error)")
             print("Detailed Description: \(error.localizedDescription)")
@@ -101,12 +94,7 @@ class EditEntryViewModel: ObservableObject {
     
     func deleteEntry() async {
         do {
-            try await supabase
-                .from("entries")
-                .delete()
-                .eq("id", value: entry.id)
-                .execute()
-                    
+            try await databaseService.deleteEntry(self.entry)
         } catch {
             print("❌ Supabase Update Failed with Error: \(error)")
             print("Detailed Description: \(error.localizedDescription)")

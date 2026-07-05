@@ -284,12 +284,14 @@ struct EntryRow: View {
                     .scale(1)
                     .fill(Color(hex: category.colorHex))
                 Image(systemName: category.iconName)
+                    .foregroundStyle(Color.black)
             }
             .frame(maxWidth: 75)
             VStack(alignment: .leading) {
                 Text(description)
                 Text(account)
                     .font(.system(size: 11))
+                    .foregroundStyle(Color.subtext1)
             }
             Spacer()
 
@@ -297,7 +299,7 @@ struct EntryRow: View {
             case .income:
                 Text(amount, format: .currency(code: "MYR"))
                     .padding()
-                    .foregroundStyle(Color.sky)
+                    .foregroundStyle(Color.catGreen)
             case .expense:
                 Text(-amount, format: .currency(code: "MYR"))
                     .padding()
@@ -305,7 +307,7 @@ struct EntryRow: View {
             case .transfer:
                 Text(amount, format: .currency(code: "MYR"))
                     .padding()
-                    .foregroundStyle(Color.catGreen)
+                    .foregroundStyle(Color.text)
             }
         }
         .padding(5)

@@ -125,4 +125,22 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .insert(transfer)
             .execute()
     }
+    
+    // Delete functions
+    func deleteEntry(_ entry: Entry) async throws {
+        try await supabase
+            .from("entries")
+            .delete()
+            .eq("id", value: entry.id)
+            .execute()
+    }
+    
+    // Update functions
+    func updateEntry(_ updatedEntry: Entry) async throws {
+        let response = try await supabase
+            .from("entries")
+            .update(updatedEntry)
+            .eq("id", value: updatedEntry.id)
+            .execute()
+    }
 }
