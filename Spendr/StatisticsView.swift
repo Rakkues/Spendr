@@ -30,7 +30,7 @@ struct StatisticsView: View {
                         .pickerStyle(.segmented)
                         .onChange(of: viewModel.selectedYear) { oldValue, newValue in
                             print("Picker changed from \(oldValue) to \(newValue)")
-                            Task { await viewModel.loadMonthlyNet() }
+                            Task { await viewModel.refresh() }
                         }
                     }
 
