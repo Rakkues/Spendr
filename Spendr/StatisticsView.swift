@@ -80,10 +80,10 @@ struct StatisticsView: View {
                         .pickerStyle(.menu)
                     }
 
-                    if viewModel.hasBudgets {
+                    if !viewModel.budgets.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(viewModel.budgets) { budget in
-                                let categoryId = budget.categoryId ?? UUID()
+                                let categoryId = budget.categoryId
 
                                 // 2. Use that clean non-optional ID to check the dictionary
                                 let spent = viewModel.monthlyExpensesByBudget[categoryId] ?? 0

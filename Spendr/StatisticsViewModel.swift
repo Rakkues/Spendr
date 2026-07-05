@@ -26,12 +26,6 @@ final class StatisticsViewModel: ObservableObject {
         self.monthlyNet.contains { $0.value != 0 }
     }
     
-    var hasBudgets: Bool {
-        !self.budgets.isEmpty
-    }
-    
-    init() {}
-    
     func refresh() async {
         self.isLoading = true
         self.errorMessage = nil
@@ -115,6 +109,7 @@ final class StatisticsViewModel: ObservableObject {
     func loadBudgetsProgress() async {
         do {
             let budgets = try await databaseService.fetchBudgets()
+            print(budgets)
             self.budgets = budgets
             guard !budgets.isEmpty else {
                 self.monthlyExpensesByBudget = [:]

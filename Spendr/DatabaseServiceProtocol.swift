@@ -103,7 +103,7 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
         let startISO = isoFormatter.string(from: interval.start)
         let endISO = isoFormatter.string(from: interval.end)
         
-        let response = try await supabase
+        return try await supabase
             .from("entries")
             // 1. Join the accounts table and select the fields you need
             .select("*, accounts!inner(id, user_id)")
@@ -113,40 +113,18 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .lte("date", value: endISO)
             .order("date", ascending: false)
             .execute()
-            
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let dateStr = try container.decode(String.self)
-                
-            let pureDateFormatter = DateFormatter()
-            pureDateFormatter.dateFormat = "yyyy-MM-dd"
-            if let date = pureDateFormatter.date(from: dateStr) { return date }
-                
-            let fractionalFormatter = ISO8601DateFormatter()
-            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            if let date = fractionalFormatter.date(from: dateStr) { return date }
-                
-            let standardFormatter = ISO8601DateFormatter()
-            if let date = standardFormatter.date(from: dateStr) { return date }
-                
-            // If all fail, throw a clean error telling you exactly what string caused the crash
-            throw DecodingError.dataCorruptedError(
-                in: container,
-                debugDescription: "Cannot decode date string: \(dateStr)"
-            )
-        }
-            
-        return try decoder.decode([Entry].self, from: response.data)
+            .value
     }
     
     func fetchBudgets() async throws -> [Budget] {
         let userId = try currentUserId
-        
+
         return try await supabase
-            .from("accounts")
-            .select("*")
-            .eq("user_id", value: userId)
+            .from("budgets")
+            // 1. Join categories table to get user_id
+            .select("*, categories!inner(id, user_id)")
+            // 2. Filter by the category's owner ID
+            .eq("categories.user_id", value: userId)
             .execute()
             .value
     }
