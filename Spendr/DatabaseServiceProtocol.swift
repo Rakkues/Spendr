@@ -172,6 +172,13 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
     }
     
+    func addAccount(_ account: Account) async throws {
+        try await supabase
+            .from("accounts")
+            .insert(account)
+            .execute()
+    }
+    
     /// Delete functions
     func deleteEntry(_ entry: Entry) async throws {
         try await supabase
@@ -203,6 +210,14 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .from("budgets")
             .update(["amount": amount])
             .eq("id", value: updatedBudget.id)
+            .execute()
+    }
+    
+    func updateAccount(_ updatedAccount: Account, name: String) async throws {
+        try await supabase
+            .from("accounts")
+            .update(["name": name])
+            .eq("id", value: updatedAccount.id)
             .execute()
     }
 }

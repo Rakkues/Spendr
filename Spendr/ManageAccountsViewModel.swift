@@ -18,14 +18,6 @@ class ManageAccountsViewModel: ObservableObject {
     
     private let databaseService = SupabaseDatabaseService()
     
-    // Type-safe model representing a new account structure to insert into database
-    private struct InsertAccount: Codable {
-        let id: UUID
-        let name: String
-        let currency_code: String
-        let user_id: UUID
-    }
-    
     func fetchAccounts() async {
         self.isLoading = true
         defer { self.isLoading = false }
@@ -52,24 +44,17 @@ class ManageAccountsViewModel: ObservableObject {
         do {
             if let account = currentAccount {
                 // Update existing account
-                try await supabase
-                    .from("accounts")
-                    .update(["name": name])
-                    .eq("id", value: account.id)
-                    .execute()
+                try await databaseService.updateAccount(account, name: name)
             } else {
                 // Create and insert new account (hardcoded currency_code: "MYR")
-                let newAccount = InsertAccount(
+                let newAccount = Account(
                     id: UUID(),
+                    userId: userId,
                     name: name,
-                    currency_code: "MYR",
-                    user_id: userId
+                    currencyCode: "MYR",
                 )
                 
-                try await supabase
-                    .from("accounts")
-                    .insert(newAccount)
-                    .execute()
+                try await databaseService.addAccount(newAccount)
             }
             
             // Reload accounts list
