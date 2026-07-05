@@ -13,21 +13,13 @@ import Supabase
 class ManageBudgetsViewModel: ObservableObject {
     @Published var budgetRows: [CategoryBudgetRow] = []
     @Published var errorMessage: String? = nil
+    
+    private let databaseService = SupabaseDatabaseService()
 
     func fetchCategoriesAndBudgets() async {
         do {
             // Extract and decode the underlying value payload directly
-            let records: [CategoryBudgetRow] = try await supabase
-                .from("categories")
-                .select("""
-                    *,
-                    budgets (
-                        id,
-                        amount
-                    )
-                """)
-                .execute()
-                .value
+            let records = try await databaseService.fetchCategoryBudget()
             
             self.budgetRows = records
             self.errorMessage = nil
@@ -37,7 +29,40 @@ class ManageBudgetsViewModel: ObservableObject {
         }
     }
     
-    func setBudget() async {}
+    func saveBudget(amount: Double, for category: Category, currentBudget: Budget?) async {
+        do {
+            if let budget = currentBudget {
+                // Update existing budget
+                try await databaseService.updateBudget(budget, amount: amount)
+            } else {
+                // Insert new budget
+                let newBudget = Budget(
+                    id: UUID(),
+                    amount: amount,
+                    categoryId: category.id
+                )
+                
+                try await databaseService.addBudget(newBudget)
+            }
+            // Reload list
+            await fetchCategoriesAndBudgets()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("❌ Save budget failed: \(error)")
+        }
+    }
+    
+    func deleteBudget(_ budget: Budget) async {
+        do {
+            try await databaseService.deleteBudget(budget)
+            
+            // Reload list
+            await fetchCategoriesAndBudgets()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("❌ Delete budget failed: \(error)")
+        }
+    }
 }
 
 struct CategoryBudgetRow: Decodable, Identifiable {

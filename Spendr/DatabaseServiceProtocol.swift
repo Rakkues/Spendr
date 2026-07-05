@@ -129,6 +129,21 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .value
     }
     
+    func fetchCategoryBudget() async throws -> [CategoryBudgetRow] {
+        return try await supabase
+            .from("categories")
+            .select("""
+                *,
+                budgets (
+                    id,
+                    amount,
+                    category_id
+                )
+            """)
+            .execute()
+            .value
+    }
+    
     /// Insert functions
     func addEntry(_ entry: Entry) async throws {
         try await supabase
@@ -150,6 +165,13 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
     }
     
+    func addBudget(_ budget: Budget) async throws {
+        try await supabase
+            .from("budgets")
+            .insert(budget)
+            .execute()
+    }
+    
     /// Delete functions
     func deleteEntry(_ entry: Entry) async throws {
         try await supabase
@@ -159,12 +181,28 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
     }
     
+    func deleteBudget(_ budget: Budget) async throws {
+        try await supabase
+            .from("budgets")
+            .delete()
+            .eq("id", value: budget.id)
+            .execute()
+    }
+    
     /// Update functions
     func updateEntry(_ updatedEntry: Entry) async throws {
         try await supabase
             .from("entries")
             .update(updatedEntry)
             .eq("id", value: updatedEntry.id)
+            .execute()
+    }
+    
+    func updateBudget(_ updatedBudget: Budget, amount: Double) async throws {
+        try await supabase
+            .from("budgets")
+            .update(["amount": amount])
+            .eq("id", value: updatedBudget.id)
             .execute()
     }
 }

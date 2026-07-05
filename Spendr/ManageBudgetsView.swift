@@ -38,7 +38,7 @@ struct ManageBudgetsView: View {
                                         Spacer()
                                         
                                         if let budget = row.budget {
-                                            Text("$\(budget.amount, specifier: "%.2f")")
+                                            Text("RM\(budget.amount, specifier: "%.2f")")
                                                 .fontWeight(.semibold)
                                                 .foregroundColor(.primary)
                                         } else {
@@ -65,19 +65,23 @@ struct ManageBudgetsView: View {
         .task {
             await viewModel.fetchCategoriesAndBudgets()
         }
-        // 5. Wire up your sheet to pass the unwrapped items to your sheet view when uncommented
-//        .sheet(item: $selectedRow) { row in
-//            EditBudgetSheet(category: row.category) { amount in
-//                Task {
-//                    await viewModel.saveBudget(amount: amount, for: row.category)
-//                    selectedRow = nil
-//                }
-//            } onDelete: {
-//                Task {
-//                    await viewModel.deleteBudget(for: row.category)
-//                    selectedRow = nil
-//                }
-//            }
-//        }
+        .sheet(item: $selectedRow) { row in
+            EditBudgetSheet(
+                category: row.category,
+                currentBudget: row.budget
+            ) { amount in
+                Task {
+                    await viewModel.saveBudget(amount: amount, for: row.category, currentBudget: row.budget)
+                    selectedRow = nil
+                }
+            } onDelete: {
+                Task {
+                    if let budget = row.budget {
+                        await viewModel.deleteBudget(budget)
+                    }
+                    selectedRow = nil
+                }
+            }
+        }
     }
 }
