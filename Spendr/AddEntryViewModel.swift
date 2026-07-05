@@ -29,7 +29,6 @@ class AddEntryViewModel: ObservableObject {
     
     func loadFormData() async {
         do {
-            // Concurrent fetching makes this super fast!
             async let fetchedCategories = self.databaseService.fetchCategories(for: self.type.rawValue)
             async let fetchedAccounts = self.databaseService.fetchAccounts()
                 
@@ -83,10 +82,6 @@ class AddEntryViewModel: ObservableObject {
     }
     
     func addTransfer() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            return
-        }
         guard let fromAccount = selectedAccount else {
             self.errorMessage = "Please select a source account."
             return

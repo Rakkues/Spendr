@@ -9,8 +9,14 @@ import Foundation
 import Supabase
 
 protocol DatabaseServiceProtocol {
-    func fetchCategories(for entryType: String) async throws -> [Category]
+    func fetchCategories(for entryType: String?) async throws -> [Category]
     func fetchAccounts() async throws -> [Account]
+}
+
+extension DatabaseServiceProtocol {
+    func fetchCategories(for entryType: String? = nil) async throws -> [Category] {
+        try await fetchCategories(for: entryType)
+    }
 }
 
 final class SupabaseDatabaseService: DatabaseServiceProtocol {
@@ -29,18 +35,19 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
     }
 
     /// Fetch functions
-    func fetchCategories(for entryType: String) async throws -> [Category] {
+    func fetchCategories(for entryType: String?) async throws -> [Category] {
         let userId = try currentUserId
         
-        let categories: [Category] = try await supabase
+        var query = supabase
             .from("categories")
             .select("*")
             .eq("user_id", value: userId)
-            .eq("entry_type", value: entryType)
-            .execute()
-            .value
         
-        return categories
+        if let entryType = entryType {
+            query = query.eq("entry_type", value: entryType)
+        }
+        
+        return try await query.execute().value
     }
     
     func fetchTransferCategory() async throws -> Category {
@@ -68,41 +75,80 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
     func fetchAccounts() async throws -> [Account] {
         let userId = try currentUserId
         
-        let accounts: [Account] = try await supabase
+        return try await supabase
             .from("accounts")
             .select("*")
             .eq("user_id", value: userId)
             .execute()
             .value
-        
-        return accounts
     }
 
     func fetchEntries() async throws -> [Entry] {
         let userId = try currentUserId
         
-        let entries: [Entry] = try await supabase
+        return try await supabase
             .from("entries")
             .select("*, accounts!inner(id, user_id)")
             .eq("accounts.user_id", value: userId)
             .in("type", values: ["expense", "income"])
             .execute()
             .value
+    }
+    
+    func fetchMontlyEntries(_ interval: (start: Date, end: Date)) async throws -> [Entry] {
+        let userId = try currentUserId
         
-        return entries
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withFullDate]
+        let startISO = isoFormatter.string(from: interval.start)
+        let endISO = isoFormatter.string(from: interval.end)
+        
+        let response = try await supabase
+            .from("entries")
+            // 1. Join the accounts table and select the fields you need
+            .select("*, accounts!inner(id, user_id)")
+            // 2. Filter using the syntax: tableName.columnName
+            .eq("accounts.user_id", value: userId)
+            .gt("date", value: startISO)
+            .lte("date", value: endISO)
+            .order("date", ascending: false)
+            .execute()
+            
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateStr = try container.decode(String.self)
+                
+            let pureDateFormatter = DateFormatter()
+            pureDateFormatter.dateFormat = "yyyy-MM-dd"
+            if let date = pureDateFormatter.date(from: dateStr) { return date }
+                
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = fractionalFormatter.date(from: dateStr) { return date }
+                
+            let standardFormatter = ISO8601DateFormatter()
+            if let date = standardFormatter.date(from: dateStr) { return date }
+                
+            // If all fail, throw a clean error telling you exactly what string caused the crash
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Cannot decode date string: \(dateStr)"
+            )
+        }
+            
+        return try decoder.decode([Entry].self, from: response.data)
     }
     
     func fetchBudgets() async throws -> [Budget] {
         let userId = try currentUserId
         
-        let budgets: [Budget] = try await supabase
+        return try await supabase
             .from("accounts")
             .select("*")
             .eq("user_id", value: userId)
             .execute()
             .value
-        
-        return budgets
     }
     
     /// Insert functions
@@ -111,7 +157,7 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .from("entries")
             .insert(entry)
             .execute()
-     }
+    }
     
     func addTransfer(from fromEntry: Entry, to toEntry: Entry, transfer: Transfer) async throws {
         try await supabase
@@ -126,7 +172,7 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
     }
     
-    // Delete functions
+    /// Delete functions
     func deleteEntry(_ entry: Entry) async throws {
         try await supabase
             .from("entries")
@@ -135,9 +181,9 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
             .execute()
     }
     
-    // Update functions
+    /// Update functions
     func updateEntry(_ updatedEntry: Entry) async throws {
-        let response = try await supabase
+        try await supabase
             .from("entries")
             .update(updatedEntry)
             .eq("id", value: updatedEntry.id)

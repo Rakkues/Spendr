@@ -95,11 +95,6 @@ class DashboardViewModel: ObservableObject {
     }
 
     func fetchEntriesForSelectedMonth() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            self.entries = []
-            return
-        }
         guard let interval = monthInterval else {
             self.errorMessage = "Invalid month interval"
             self.entries = []
@@ -109,54 +104,8 @@ class DashboardViewModel: ObservableObject {
         self.isLoading = true
         defer { isLoading = false }
 
-        let userId = user.id.uuidString.lowercased()
-
-        // Format dates as ISO8601 (date-only or full). Assuming your `entries.date` is stored as timestamp/date in Supabase.
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withFullDate]
-        let startISO = isoFormatter.string(from: interval.start)
-        let endISO = isoFormatter.string(from: interval.end)
-
         do {
-            // entry_type IN ('expense','income') and date >= start and date < end
-            let response = try await supabase
-                .from("entries")
-                // 1. Join the accounts table and select the fields you need
-                .select("*, accounts!inner(id, user_id)")
-                // 2. Filter using the syntax: tableName.columnName
-                .eq("accounts.user_id", value: userId)
-                .in("type", values: ["expense", "income"])
-                .gt("date", value: startISO)
-                .lte("date", value: endISO)
-                .order("date", ascending: false)
-                .execute()
-
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let dateStr = try container.decode(String.self)
-                
-                let pureDateFormatter = DateFormatter()
-                pureDateFormatter.dateFormat = "yyyy-MM-dd"
-                if let date = pureDateFormatter.date(from: dateStr) { return date }
-                
-                let fractionalFormatter = ISO8601DateFormatter()
-                fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                if let date = fractionalFormatter.date(from: dateStr) { return date }
-
-                let standardFormatter = ISO8601DateFormatter()
-                if let date = standardFormatter.date(from: dateStr) { return date }
-
-                // If all fail, throw a clean error telling you exactly what string caused the crash
-                throw DecodingError.dataCorruptedError(
-                    in: container,
-                    debugDescription: "Cannot decode date string: \(dateStr)"
-                )
-            }
-
-            let fetched = try decoder.decode([Entry].self, from: response.data)
-            self.entries = fetched
-
+            self.entries = try await databaseService.fetchMontlyEntries(interval)
             self.errorMessage = nil
         } catch {
             self.errorMessage = error.localizedDescription
@@ -180,26 +129,8 @@ class DashboardViewModel: ObservableObject {
     }
 
     func fetchCategories() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            return
-        }
-
-        let userId = user.id.uuidString.lowercased()
-
         do {
-            // 1. Fetch the raw response data
-            let response = try await supabase
-                .from("categories")
-                .select("*")
-                .eq("user_id", value: userId)
-                .execute()
-
-            let decoder = JSONDecoder()
-
-            let fetchedCategories = try decoder.decode([Category].self, from: response.data)
-
-            self.categories = fetchedCategories
+            self.categories = try await databaseService.fetchCategories()
         } catch {
             self.errorMessage = error.localizedDescription
             print("Error fetching categories: \(error)")
@@ -207,26 +138,8 @@ class DashboardViewModel: ObservableObject {
     }
 
     func fetchAccounts() async {
-        guard let user = supabase.auth.currentUser else {
-            self.errorMessage = "No user logged in"
-            return
-        }
-
-        let userId = user.id.uuidString.lowercased()
-
         do {
-            // 1. Fetch the raw response data
-            let response = try await supabase
-                .from("accounts")
-                .select("*")
-                .eq("user_id", value: userId)
-                .execute()
-
-            let decoder = JSONDecoder()
-
-            let fetchedAccounts = try decoder.decode([Account].self, from: response.data)
-
-            self.accounts = fetchedAccounts
+            self.accounts = try await databaseService.fetchAccounts()
         } catch {
             self.errorMessage = error.localizedDescription
             print("Error fetching categories: \(error)")
