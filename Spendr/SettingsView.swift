@@ -18,13 +18,8 @@ struct SettingsView: View {
 
                 List {
                     Section(header: Text("Account Settings")) {
-                        // 2. Wrap each row in a NavigationLink with its destination view
                         NavigationLink(destination: ManageAccountsView()) {
                             Label("Accounts", systemImage: "creditcard")
-                        }
-
-                        NavigationLink(destination: ManageCategoriesView()) {
-                            Label("Categories", systemImage: "tag")
                         }
 
                         NavigationLink(destination: ManageBudgetsView()) {
@@ -33,7 +28,6 @@ struct SettingsView: View {
                     }
                     .listRowBackground(Color.base)
 
-                    // 3. Put the button cleanly inside a final section or list row
                     Section {
                         Button(role: .destructive) {
                             Task {
