@@ -140,6 +140,7 @@ final class SupabaseDatabaseService: DatabaseServiceProtocol {
                     category_id
                 )
             """)
+            .eq("entry_type", value: "expense")
             .execute()
             .value
     }
